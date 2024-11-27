@@ -88,12 +88,15 @@ class Taxi(pygame.sprite.Sprite):
         """
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return False
-
         if self.rect.colliderect(obstacle.rect):
+
             if pygame.sprite.collide_mask(self, obstacle):
+                print("crash obs")
+
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
+                self._velocity_y = 0.0
                 self._acceleration_x = 0.0
                 self._acceleration_y = Taxi._CRASH_ACCELERATION
                 return True
@@ -111,9 +114,12 @@ class Taxi(pygame.sprite.Sprite):
 
         if self.rect.colliderect(pad.rect):
             if pygame.sprite.collide_mask(self, pad):
+                print("crash pad")
+
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
+                self._velocity_y = 0.0
                 self._acceleration_x = 0.0
                 self._acceleration_y = Taxi._CRASH_ACCELERATION
                 return True
