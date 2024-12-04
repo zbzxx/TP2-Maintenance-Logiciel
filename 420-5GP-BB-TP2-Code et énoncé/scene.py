@@ -20,3 +20,7 @@ class Scene(ABC):
     @abstractmethod
     def surface(self) -> pygame.Surface:
         pass
+
+    @abstractmethod
+    def unload(self) -> None:
+        pass

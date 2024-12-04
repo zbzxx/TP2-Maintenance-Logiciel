@@ -47,8 +47,10 @@ class SceneManager:
 
         if self._transitioning:
             self._fade.update()
-
             if not self._fade.is_fading():
+
+                if self._current_scene:
+                    self._current_scene.unload()
                 self._current_scene, self._next_scene = self._next_scene, None
                 self._transitioning = False
 
