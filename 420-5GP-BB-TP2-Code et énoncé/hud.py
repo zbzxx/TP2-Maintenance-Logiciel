@@ -1,12 +1,13 @@
 import pygame
 
-from game_settings import GameSettings
+from game_settings import GameSettings, FILES
+
 
 
 class HUD:
     """ Singleton pour l'affichage tête haute (HUD). """
 
-    _LIVES_ICONS_FILENAME = "img/hud_lives.png"
+    _LIVES_ICONS_FILENAME = FILES['lives_icons']
     _LIVES_ICONS_SPACING = 10
 
     _instance = None

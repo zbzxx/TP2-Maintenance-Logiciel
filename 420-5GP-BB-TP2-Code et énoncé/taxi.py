@@ -7,6 +7,7 @@ from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
 from pump import Pump
+from game_settings import FILES
 
 
 class ImgSelector(Enum):
@@ -63,11 +64,11 @@ class Taxi(pygame.sprite.Sprite):
 
         self._hud = HUD()
 
-        self._reactor_sound = pygame.mixer.Sound("snd/170278__knova__jetpack-low.wav")
+        self._reactor_sound = pygame.mixer.Sound(FILES['reactor_sound'])
         self._reactor_sound.set_volume(0)
         self._reactor_sound.play(-1)
 
-        self._crash_sound = pygame.mixer.Sound("snd/237375__squareal__car-crash.wav")
+        self._crash_sound = pygame.mixer.Sound(FILES['crash_sound'])
 
         self._surfaces, self._masks = Taxi._load_and_build_surfaces()
 
