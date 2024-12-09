@@ -69,7 +69,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._crash_sound = pygame.mixer.Sound("snd/237375__squareal__car-crash.wav")
 
-        self._surfaces, self._masks = Taxi._load_and_build_surfaces()
+        self._surfaces, self._masks, self._maskReactor = Taxi._load_and_build_surfaces()
 
         self._reinitialize()
 
@@ -99,7 +99,6 @@ class Taxi(pygame.sprite.Sprite):
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return False
         if self.rect.colliderect(obstacle.rect):
-
             if pygame.sprite.collide_mask(self, obstacle):
                 print("crash obs")
 
@@ -171,7 +170,7 @@ class Taxi(pygame.sprite.Sprite):
 
                     self._flags ^= Taxi._FLAG_GEAR_OUT  # flip le bit pour refléter le nouvel état
 
-                    self._select_image()
+                    self._select_image( False )
 
     def has_exited(self) -> bool:
         """
@@ -189,10 +188,13 @@ class Taxi(pygame.sprite.Sprite):
         if self._pad_landed_on or astronaut.is_onboard():
             return False
 
-        if self.rect.colliderect(astronaut.rect):
-            if pygame.sprite.collide_mask(self, astronaut):
-                return True
 
+        if self.rect.colliderect(astronaut.rect):
+            self._select_image(True)
+            if pygame.sprite.collide_mask(self, astronaut):
+               self._select_image( False )
+               return True
+        self._select_image( False )
         return False
 
     def is_destroyed(self) -> bool:
@@ -290,7 +292,7 @@ class Taxi(pygame.sprite.Sprite):
             self._reactor_sound.set_volume(0)
 
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
-        self._select_image()
+        self._select_image(False)
 
     def _handle_keys(self) -> None:
         """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
@@ -333,7 +335,7 @@ class Taxi(pygame.sprite.Sprite):
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """
         self._flags = 0
-        self._select_image()
+        self._select_image(False)
 
         self.rect = self.image.get_rect()
         self.rect.x = self._initial_pos[0] - self.rect.width / 2
@@ -353,60 +355,80 @@ class Taxi(pygame.sprite.Sprite):
         self._astronaut = None
         self._hud.set_trip_money(0.0)
 
-    def _select_image(self) -> None:
+    def _select_image(self, reactorCheck) -> None:
         """ Sélectionne l'image et le masque à utiliser pour l'affichage du taxi en fonction de son état. """
         facing = self._flags & Taxi._FLAG_LEFT
 
         if self._flags & Taxi._FLAG_DESTROYED:
             self.image = self._surfaces[ImgSelector.DESTROYED][facing]
             self.mask = self._masks[ImgSelector.DESTROYED][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.DESTROYED][facing]
             return
 
         condition_flags = Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR
         if self._flags & condition_flags == condition_flags:
             self.image = self._surfaces[ImgSelector.TOP_AND_REAR_REACTORS][facing]
             self.mask = self._masks[ImgSelector.TOP_AND_REAR_REACTORS][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.TOP_AND_REAR_REACTORS][facing]
             return
 
         condition_flags = Taxi._FLAG_BOTTOM_REACTOR | Taxi._FLAG_REAR_REACTOR
         if self._flags & condition_flags == condition_flags:
             self.image = self._surfaces[ImgSelector.BOTTOM_AND_REAR_REACTORS][facing]
             self.mask = self._masks[ImgSelector.BOTTOM_AND_REAR_REACTORS][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.BOTTOM_AND_REAR_REACTORS][facing]
             return
 
         if self._flags & Taxi._FLAG_REAR_REACTOR:
             self.image = self._surfaces[ImgSelector.REAR_REACTOR][facing]
             self.mask = self._masks[ImgSelector.REAR_REACTOR][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.REAR_REACTOR][facing]
             return
 
         condition_flags = Taxi._FLAG_GEAR_OUT | Taxi._FLAG_BOTTOM_REACTOR
         if self._flags & condition_flags == condition_flags:
             self.image = self._surfaces[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR][facing]
             self.mask = self._masks[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR][facing]
             return
 
         if self._flags & Taxi._FLAG_BOTTOM_REACTOR:
             self.image = self._surfaces[ImgSelector.BOTTOM_REACTOR][facing]
             self.mask = self._masks[ImgSelector.BOTTOM_REACTOR][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.BOTTOM_REACTOR][facing]
             return
 
         if self._flags & Taxi._FLAG_TOP_REACTOR:
             self.image = self._surfaces[ImgSelector.TOP_REACTOR][facing]
             self.mask = self._masks[ImgSelector.TOP_REACTOR][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.TOP_REACTOR][facing]
             return
 
         if self._flags & Taxi._FLAG_GEAR_OUT:
             self.image = self._surfaces[ImgSelector.GEAR_OUT][facing]
             self.mask = self._masks[ImgSelector.GEAR_OUT][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.GEAR_OUT][facing]
             return
 
         if self._flags & Taxi._FLAG_DESTROYED:
             self.image = self._surfaces[ImgSelector.DESTROYED][facing]
             self.mask = self._masks[ImgSelector.DESTROYED][facing]
+            if reactorCheck:
+                self.mask = self._maskReactor[ImgSelector.DESTROYED][facing]
             return
 
         self.image = self._surfaces[ImgSelector.IDLE][facing]
         self.mask = self._masks[ImgSelector.IDLE][facing]
+        if reactorCheck:
+            self.mask = self._maskReactor[ImgSelector.IDLE][facing]
 
     @staticmethod
     def _load_and_build_surfaces() -> tuple:
@@ -419,6 +441,7 @@ class Taxi(pygame.sprite.Sprite):
         """
         surfaces = {}
         masks = {}
+        masksReactor = {}
         sprite_sheet = pygame.image.load(Taxi._TAXIS_FILENAME).convert_alpha()
         sheet_width = sprite_sheet.get_width()
         sheet_height = sprite_sheet.get_height()
@@ -430,6 +453,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.IDLE] = surface, flipped
         masks[ImgSelector.IDLE] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
+        masksReactor[ImgSelector.IDLE] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(flipped )
+
 
         # taxi avec réacteur du dessous
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -440,6 +465,7 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.BOTTOM_REACTOR] = surface, flipped
         masks[ImgSelector.BOTTOM_REACTOR] = masks[ImgSelector.IDLE]
+        masksReactor[ImgSelector.BOTTOM_REACTOR] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
 
         # taxi avec réacteur du dessus
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -450,6 +476,7 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.TOP_REACTOR] = surface, flipped
         masks[ImgSelector.TOP_REACTOR] = masks[ImgSelector.IDLE]
+        masksReactor[ImgSelector.TOP_REACTOR] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(flipped )
 
         # taxi avec réacteur arrière
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -460,6 +487,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.REAR_REACTOR] = surface, flipped
         masks[ImgSelector.REAR_REACTOR] = masks[ImgSelector.IDLE]
+        masksReactor[ImgSelector.REAR_REACTOR] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi avec réacteurs du dessous et arrière
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -472,6 +501,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.BOTTOM_AND_REAR_REACTORS] = surface, flipped
         masks[ImgSelector.BOTTOM_AND_REAR_REACTORS] = masks[ImgSelector.IDLE]
+        masksReactor[ImgSelector.BOTTOM_AND_REAR_REACTORS] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi avec réacteurs du dessus et arrière
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -484,6 +515,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.TOP_AND_REAR_REACTORS] = surface, flipped
         masks[ImgSelector.TOP_AND_REAR_REACTORS] = masks[ImgSelector.IDLE]
+        masksReactor[ImgSelector.TOP_AND_REAR_REACTORS] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi avec train d'atterrissage
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -494,6 +527,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.GEAR_OUT] = surface, flipped
         masks[ImgSelector.GEAR_OUT] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
+        masksReactor[ImgSelector.GEAR_OUT] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi avec train d'atterrissage comprimé
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -503,6 +538,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.GEAR_SHOCKS] = surface, flipped
         masks[ImgSelector.GEAR_SHOCKS] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
+        masksReactor[ImgSelector.GEAR_SHOCKS] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi avec réacteur du dessous et train d'atterrissage
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -515,6 +552,8 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR] = surface, flipped
         masks[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR] = masks[ImgSelector.GEAR_OUT]
+        masksReactor[ImgSelector.GEAR_OUT_AND_BOTTOM_REACTOR] = pygame.mask.from_surface( surface ), pygame.mask.from_surface(
+            flipped )
 
         # taxi détruit
         surface = pygame.Surface((sheet_width / Taxi._NB_TAXI_IMAGES, sheet_height), flags=pygame.SRCALPHA)
@@ -524,5 +563,6 @@ class Taxi(pygame.sprite.Sprite):
         flipped = pygame.transform.flip(surface, True, False)
         surfaces[ImgSelector.DESTROYED] = surface, flipped
         masks[ImgSelector.DESTROYED] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
+        masksReactor[ImgSelector.DESTROYED] = pygame.mask.from_surface(surface ), pygame.mask.from_surface(flipped )
 
-        return surfaces, masks
+        return surfaces, masks, masksReactor
