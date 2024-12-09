@@ -185,17 +185,19 @@ class Astronaut(pygame.sprite.Sprite):
                 self._call_taxi()
                 self._state = AstronautState.WAVING
                 self._state_time = 0
-                self._frames = self._all_frames[AstronautState.WAVING]
+                self._frames = self._all_frames[self._state]
                 self._current_frame = 0
+
         elif self._state == AstronautState.WAVING:
             last_frame = self._current_frame == len(self._frames) - 1
-            spent_state_time = self._state_time >= self._FRAME_TIMES[AstronautState.WAVING] * len(self._frames)
+            spent_state_time = self._state_time >= self._FRAME_TIMES[self._state] * len(self._frames)
             if last_frame and spent_state_time:
                 self._state = AstronautState.WAITING
                 self._state_time = 0
-                self._frames = self._all_frames[AstronautState.WAITING]
+                self._frames = self._all_frames[self._state]
                 self._current_frame = 0
                 self._waving_delay = random.uniform(*Astronaut._WAVING_DELAYS)
+
         elif self._state in (AstronautState.JUMPING_RIGHT, AstronautState.JUMPING_LEFT):
             if self.rect.x == self._target_x:
                 if self._target_pad is not Pad.UP and self._target_x == self._target_pad.astronaut_end.x:
