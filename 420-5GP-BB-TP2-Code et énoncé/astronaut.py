@@ -204,10 +204,7 @@ class Astronaut(pygame.sprite.Sprite):
                     self._state = AstronautState.REACHED_DESTINATION
                 else:
                     self._state = AstronautState.ONBOARD
-                    if self._target_pad is None:
-                        self._pad_please_clips[0].play()
-                    else:
-                        self._pad_please_clips[self._target_pad.number].play()
+                    self._notify_destination()
 
                 return
 
@@ -228,6 +225,13 @@ class Astronaut(pygame.sprite.Sprite):
         if self._state == AstronautState.WAITING:
             clip = random.choice(self._hey_taxi_clips)
             clip.play()
+
+    def _notify_destination(self) -> None:
+        """ Joue le son d'appel du taxi. """
+        if self._target_pad is None:
+            self._pad_please_clips[0].play()
+        else:
+            self._pad_please_clips[self._target_pad.number].play()
 
     @staticmethod
     def _load_and_build_frames() -> tuple:
