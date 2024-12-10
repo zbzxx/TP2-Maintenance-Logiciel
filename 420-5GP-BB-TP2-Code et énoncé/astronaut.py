@@ -4,6 +4,7 @@ import time
 
 from enum import Enum, auto
 from pad import Pad
+from game_settings import FILES
 
 
 class AstronautState(Enum):
@@ -19,7 +20,7 @@ class AstronautState(Enum):
 class Astronaut(pygame.sprite.Sprite):
     """ Un astronaute. """
 
-    _ASTRONAUT_FILENAME = "img/astronaut.png"
+    _ASTRONAUT_FILENAME = FILES['astronaut']
     _NB_WAITING_IMAGES = 1
     _NB_WAVING_IMAGES = 4
     _NB_JUMPING_IMAGES = 6
@@ -203,10 +204,7 @@ class Astronaut(pygame.sprite.Sprite):
                     self._state = AstronautState.REACHED_DESTINATION
                 else:
                     self._state = AstronautState.ONBOARD
-                    if self._target_pad is None:
-                        self._pad_please_clips[0].play()
-                    else:
-                        self._pad_please_clips[self._target_pad.number].play()
+                    self._notify_destination()
 
                 return
 
@@ -227,6 +225,13 @@ class Astronaut(pygame.sprite.Sprite):
         if self._state == AstronautState.WAITING:
             clip = random.choice(self._hey_taxi_clips)
             clip.play()
+
+    def _notify_destination(self) -> None:
+        """ Joue le son d'appel du taxi. """
+        if self._target_pad is None:
+            self._pad_please_clips[0].play()
+        else:
+            self._pad_please_clips[self._target_pad.number].play()
 
     @staticmethod
     def _load_and_build_frames() -> tuple:
@@ -293,17 +298,17 @@ class Astronaut(pygame.sprite.Sprite):
                      - une liste de clips (pygame.mixer.Sound) "Pad # please" ou "Up please"
                      - une liste de clips (pygame.mixer.Sound) "Hey!"
         """
-        hey_taxis = [pygame.mixer.Sound("voices/gary_hey_taxi_01.mp3"),
-                     pygame.mixer.Sound("voices/gary_hey_taxi_02.mp3"),
-                     pygame.mixer.Sound("voices/gary_hey_taxi_03.mp3")]
+        hey_taxis = [pygame.mixer.Sound(FILES['hey_taxi_sound_1']),
+                     pygame.mixer.Sound(FILES['hey_taxi_sound_2']),
+                     pygame.mixer.Sound(FILES['hey_taxi_sound_3'])]
 
-        pad_pleases = [pygame.mixer.Sound("voices/gary_up_please_01.mp3"),
-                       pygame.mixer.Sound("voices/gary_pad_1_please_01.mp3"),
-                       pygame.mixer.Sound("voices/gary_pad_2_please_01.mp3"),
-                       pygame.mixer.Sound("voices/gary_pad_3_please_01.mp3"),
-                       pygame.mixer.Sound("voices/gary_pad_4_please_01.mp3"),
-                       pygame.mixer.Sound("voices/gary_pad_5_please_01.mp3")]
+        pad_pleases = [pygame.mixer.Sound(FILES['up_pls_sound']),
+                       pygame.mixer.Sound(FILES['pad_1_pls_sound']),
+                       pygame.mixer.Sound(FILES['pad_2_pls_sound']),
+                       pygame.mixer.Sound(FILES['pad_3_pls_sound']),
+                       pygame.mixer.Sound(FILES['pad_4_pls_sound']),
+                       pygame.mixer.Sound(FILES['pad_5_pls_sound'])]
 
-        heys = [pygame.mixer.Sound("voices/gary_hey_01.mp3")]
+        heys = [pygame.mixer.Sound(FILES['gary_hey_sound'])]
 
         return hey_taxis, pad_pleases, heys

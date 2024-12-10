@@ -46,6 +46,8 @@ def main() -> None:
     if show_fps:
         fps_font = pygame.font.Font(None, 36)
 
+    fixed_time_step = 1/settings.FPS
+
     scene_manager = SceneManager()
     scene_manager.add_scene("blank", BlankScene())
     scene_manager.add_scene("splash", SplashScene())
@@ -58,14 +60,14 @@ def main() -> None:
     try:
         while True:
 
-            delta_time = clock.tick(settings.FPS) / 1000  # en secondes
+            clock.tick(settings.FPS)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit_game()
                 scene_manager.handle_event(event)
 
-            scene_manager.update(delta_time)
+            scene_manager.update(fixed_time_step)
 
             scene_manager.render(screen)
 

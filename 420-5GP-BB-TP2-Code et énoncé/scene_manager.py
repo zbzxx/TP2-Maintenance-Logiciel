@@ -37,17 +37,20 @@ class SceneManager:
         self._fade.start(fade_duration)
         self._transitioning = True
 
-    def update(self, delta_time: float) -> None:
+    def update(self, fixed_time_step : float) -> None:
+
         if self._current_scene:
-            self._current_scene.update(delta_time)
+            self._current_scene.update(fixed_time_step)
 
         if self._next_scene:
-            self._next_scene.update(delta_time)
+            self._next_scene.update(fixed_time_step)
 
         if self._transitioning:
             self._fade.update()
-
             if not self._fade.is_fading():
+
+                if self._current_scene:
+                    self._current_scene.unload()
                 self._current_scene, self._next_scene = self._next_scene, None
                 self._transitioning = False
 

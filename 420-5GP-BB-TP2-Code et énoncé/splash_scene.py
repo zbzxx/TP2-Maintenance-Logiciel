@@ -2,6 +2,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
+from game_settings import FILES
 
 
 class SplashScene(Scene):
@@ -11,10 +12,13 @@ class SplashScene(Scene):
 
     def __init__(self) -> None:
         super().__init__()
-        self._surface = pygame.image.load("img/splash.png").convert_alpha()
-        # self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
-        # self._music.play(loops=-1, fade_ms=1000)
+        self._surface = pygame.image.load(FILES['splash']).convert_alpha()
+        self._music = pygame.mixer.Sound(FILES['music_splash'])
+        self._music.play(loops=-1, fade_ms=1000)
         self._fade_out_start_time = None
+
+    def unload(self):
+        return
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:

@@ -2,7 +2,7 @@ import pygame
 import time
 
 from astronaut import Astronaut
-from game_settings import GameSettings
+from game_settings import GameSettings, FILES
 from gate import Gate
 from hud import HUD
 from obstacle import Obstacle
@@ -28,8 +28,8 @@ class LevelScene(Scene):
         super().__init__()
 
         self._level = level
-        self._surface = pygame.image.load("img/space01.png").convert_alpha()
-        self._music = pygame.mixer.Sound("snd/476556__magmisoundtracks__sci-fi-music-loop-01.wav")
+        self._surface = pygame.image.load(FILES['space01']).convert_alpha()
+        self._music = pygame.mixer.Sound(FILES['music_lvl'])
         self._music_started = False
         self._fade_out_start_time = None
 
@@ -38,14 +38,14 @@ class LevelScene(Scene):
 
         self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2))
 
-        self._gate = Gate("img/gate.png", (582, 3))
+        self._gate = Gate(FILES['gate'], (582, 3))
 
-        self._obstacles = [Obstacle("img/south01.png", (0, self._settings.SCREEN_HEIGHT - 141)),
-                           Obstacle("img/west01.png", (0, 0)),
-                           Obstacle("img/east01.png", (self._settings.SCREEN_WIDTH - 99, 0)),
-                           Obstacle("img/north01.png", (0, 0)),
-                           Obstacle("img/obstacle01.png", (840, 150)),
-                           Obstacle("img/obstacle02.png", (250, 200))]
+        self._obstacles = [Obstacle(FILES['south01'], (0, self._settings.SCREEN_HEIGHT - 141)),
+                           Obstacle(FILES['west01'], (0, 0)),
+                           Obstacle(FILES['east01'], (self._settings.SCREEN_WIDTH - 99, 0)),
+                           Obstacle(FILES['north01'], (0, 0)),
+                           Obstacle(FILES['obstacle01'], (840, 150)),
+                           Obstacle(FILES['obstacle02'], (250, 200))]
         self._obstacle_sprites = pygame.sprite.Group()
         self._obstacle_sprites.add(self._obstacles)
 
@@ -53,11 +53,11 @@ class LevelScene(Scene):
         self._pump_sprites = pygame.sprite.Group()
         self._pump_sprites.add(self._pumps)
 
-        self._pads = [Pad(1, "img/pad01.png", (650, self._settings.SCREEN_HEIGHT - 68), 5, 5),
-                      Pad(2, "img/pad02.png", (510, 205), 90, 15),
-                      Pad(3, "img/pad03.png", (150, 360), 10, 10),
-                      Pad(4, "img/pad04.png", (670, 480), 30, 280),
-                      Pad(5, "img/pad05.png", (1040, 380), 30, 120)]
+        self._pads = [Pad(1, FILES['pad01'], (650, self._settings.SCREEN_HEIGHT - 68), 5, 5),
+                      Pad(2, FILES['pad02'], (510, 205), 90, 15),
+                      Pad(3, FILES['pad03'], (150, 360), 10, 10),
+                      Pad(4, FILES['pad04'], (670, 480), 30, 280),
+                      Pad(5, FILES['pad05'], (1040, 380), 30, 120)]
         self._pad_sprites = pygame.sprite.Group()
         self._pad_sprites.add(self._pads)
 
@@ -74,6 +74,9 @@ class LevelScene(Scene):
 
         if self._taxi:
             self._taxi.handle_event(event)
+
+    def unload(self):
+        return
 
     def update(self, delta_time: float) -> None:
         """
@@ -119,7 +122,7 @@ class LevelScene(Scene):
             elif self._taxi.pad_landed_on:
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
                     if self._astronaut.is_waiting_for_taxi():
-                        self._astronaut.jump(self._taxi.rect.x)
+                        self._astronaut.jump(self._taxi.rect.x + self._taxi.door_location())
             elif self._astronaut.is_jumping_on_starting_pad():
                 self._astronaut.wait()
         else:

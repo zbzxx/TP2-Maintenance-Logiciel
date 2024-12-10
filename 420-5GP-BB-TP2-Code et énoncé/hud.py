@@ -1,12 +1,13 @@
 import pygame
 
-from game_settings import GameSettings
+from game_settings import GameSettings, FILES
+
 
 
 class HUD:
     """ Singleton pour l'affichage tête haute (HUD). """
 
-    _LIVES_ICONS_FILENAME = "img/hud_lives.png"
+    _LIVES_ICONS_FILENAME = FILES['lives_icons']
     _LIVES_ICONS_SPACING = 10
 
     _instance = None
@@ -20,7 +21,7 @@ class HUD:
         if not hasattr(self, '_initialized'):
             self._settings = GameSettings()
 
-            self._money_font = pygame.font.Font(None, 36)
+            self._money_font = pygame.font.Font("fonts/boombox2.ttf", 36)
 
             self._bank_money = 0
             self._bank_money_surface = self._render_bank_money_surface()

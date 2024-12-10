@@ -2,6 +2,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
+from game_settings import FILES
 
 
 class LevelLoadingScene(Scene):
@@ -12,8 +13,8 @@ class LevelLoadingScene(Scene):
     def __init__(self, level: int) -> None:
         super().__init__()
         self._level = level
-        self._surface = pygame.image.load("img/loading.png").convert_alpha()
-        self._music = pygame.mixer.Sound("snd/390539__burghrecords__dystopian-future-fx-sounds-8.wav")
+        self._surface = pygame.image.load(FILES['loading']).convert_alpha()
+        self._music = pygame.mixer.Sound(FILES['music_loading'])
         self._music_started = False
         self._fade_out_start_time = None
 
@@ -22,6 +23,9 @@ class LevelLoadingScene(Scene):
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 self._fade_out_start_time = pygame.time.get_ticks()
                 SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
+
+    def unload(self):
+        return
 
     def update(self, delta_time: float) -> None:
         if not self._music_started:
