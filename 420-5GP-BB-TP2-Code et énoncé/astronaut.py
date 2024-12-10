@@ -261,7 +261,10 @@ class Astronaut(pygame.sprite.Sprite):
             surface.blit(sprite_sheet, (0, 0), source_rect)
             mask = pygame.mask.from_surface(surface)
             waving_frames.append((surface, mask))
-        waving_frames.extend(waving_frames[1:-1][::-1])
+        # waving_frames.extend(waving_frames[1:-1][::-1])
+        added_frames = waiting_frames[-3:]
+        waving_frames.extend(added_frames * 2)
+        waving_frames.extend(waving_frames[:2][::-1])
 
         # astronaute qui se déplace en sautant (les _NB_JUMPING_IMAGES prochaines images)
         jumping_left_frames = []

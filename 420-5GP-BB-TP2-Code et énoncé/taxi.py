@@ -81,7 +81,7 @@ class Taxi(pygame.sprite.Sprite):
         self._astronaut = astronaut
 
 
-    def crash_on_anything(self, obs: Obstacle| Pad|Pump):
+    def crash_on_anything(self, obs: Obstacle| Pad| Pump):
         """
               Vérifie si le taxi est en situation de crash contre un obstacle.
               :param obstacle: obstacle avec lequel vérifier
