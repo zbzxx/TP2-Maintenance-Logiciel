@@ -12,8 +12,8 @@ class SplashScene(Scene):
     def __init__(self) -> None:
         super().__init__()
         self._surface = pygame.image.load("img/splash.png").convert_alpha()
-        self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
-        self._music.play(loops=-1, fade_ms=1000)
+        # self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
+        # self._music.play(loops=-1, fade_ms=1000)
         self._fade_out_start_time = None
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -26,7 +26,7 @@ class SplashScene(Scene):
         if self._fade_out_start_time:
             elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
             volume = max(0.0, 1.0 - (elapsed_time / SplashScene._FADE_OUT_DURATION))
-            self._music.set_volume(volume)
+            # self._music.set_volume(volume)
             if volume == 0:
                 self._fade_out_start_time = None
 

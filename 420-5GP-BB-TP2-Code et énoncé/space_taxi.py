@@ -27,6 +27,7 @@ from level_loading_scene import LevelLoadingScene
 from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
+from blank_scene import BlankScene
 
 
 def main() -> None:
@@ -46,12 +47,13 @@ def main() -> None:
         fps_font = pygame.font.Font(None, 36)
 
     scene_manager = SceneManager()
+    scene_manager.add_scene("blank", BlankScene())
     scene_manager.add_scene("splash", SplashScene())
     scene_manager.add_scene("level1_load", LevelLoadingScene(1))
     scene_manager.add_scene("level1", LevelScene(1))
     scene_manager.add_scene("level2_load", LevelLoadingScene(2))
 
-    scene_manager.set_scene("splash")
+    scene_manager.set_scene("blank")
 
     try:
         while True:
@@ -165,5 +167,6 @@ def display_error_message():
 if __name__ == '__main__':
     try:
         main()
-    except:
+    except Exception as e:
+        print(e)
         thread = Thread(target=display_error_message())
