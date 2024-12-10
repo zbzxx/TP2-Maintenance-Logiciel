@@ -249,23 +249,25 @@ class Astronaut(pygame.sprite.Sprite):
         sheet_height = sprite_sheet.get_height()
         image_size = (sheet_width / nb_images, sheet_height)
 
+        def create_surface(current_frame) -> pygame.Surface :
+            surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
+            source_rect = surface.get_rect()
+            source_rect.x = current_frame * source_rect.width
+            surface.blit(sprite_sheet, (0, 0), source_rect)
+            return surface
+
+        def create_mask(current_frame) -> pygame.Mask:
+            mask = pygame.mask.from_surface(create_surface(current_frame))
+            return mask
+
         # astronaute qui attend
-        waiting_surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
-        source_rect = waiting_surface.get_rect()
-        waiting_surface.blit(sprite_sheet, (0, 0), source_rect)
-        waiting_mask = pygame.mask.from_surface(waiting_surface)
-        waiting_frames = [(waiting_surface, waiting_mask)]
+        waiting_frames = [(create_surface(Astronaut._NB_WAITING_IMAGES), create_mask(Astronaut._NB_WAITING_IMAGES))]
 
         # astronaute qui envoie la main (les _NB_WAVING_IMAGES prochaines images)
         waving_frames = []
         first_frame = Astronaut._NB_WAITING_IMAGES
         for frame in range(first_frame, first_frame + Astronaut._NB_WAVING_IMAGES):
-            surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
-            source_rect = surface.get_rect()
-            source_rect.x = frame * source_rect.width
-            surface.blit(sprite_sheet, (0, 0), source_rect)
-            mask = pygame.mask.from_surface(surface)
-            waving_frames.append((surface, mask))
+            waving_frames.append((create_surface(frame), create_mask(frame)))
         waving_frames.extend(waving_frames[1:-1][::-1])
 
         # astronaute qui se déplace en sautant (les _NB_JUMPING_IMAGES prochaines images)
@@ -273,14 +275,9 @@ class Astronaut(pygame.sprite.Sprite):
         jumping_right_frames = []
         first_frame = Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES
         for frame in range(first_frame, first_frame + Astronaut._NB_JUMPING_IMAGES):
-            surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
-            source_rect = surface.get_rect()
-            source_rect.x = frame * source_rect.width
-            surface.blit(sprite_sheet, (0, 0), source_rect)
-            mask = pygame.mask.from_surface(surface)
-            jumping_right_frames.append((surface, mask))
+            jumping_right_frames.append((create_surface(frame), create_mask(frame)))
 
-            flipped_surface = pygame.transform.flip(surface, True, False)
+            flipped_surface = pygame.transform.flip(create_surface(frame), True, False)
             flipped_mask = pygame.mask.from_surface(flipped_surface)
             jumping_left_frames.append((flipped_surface, flipped_mask))
 
@@ -307,5 +304,5 @@ class Astronaut(pygame.sprite.Sprite):
                        pygame.mixer.Sound(FILES['pad_5_pls_sound'])]
 
         heys = [pygame.mixer.Sound(FILES['gary_hey_sound'])]
-
+        
         return hey_taxis, pad_pleases, heys
