@@ -11,7 +11,8 @@ class BlankScene(Scene):
 
     def __init__(self) -> None:
         super().__init__()
-        self._surface = pygame.image.load("img/astronaut.png").convert_alpha()
+        self._surface = pygame.Surface((1280,720)).convert()
+        self._surface.fill((0,0,0))
         self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
         self._music.play(loops=-1, fade_ms=1000)
         self._fade_out_start_time = pygame.time.get_ticks()
