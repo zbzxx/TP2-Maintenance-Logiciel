@@ -16,6 +16,9 @@ from taxi import Taxi
 class LevelScene(Scene):
     """ Un niveau de jeu. """
 
+    def unload(self) -> None:
+        pass
+
     _FADE_OUT_DURATION: int = 500  # ms
 
     _TIME_BETWEEN_ASTRONAUTS: int = 5  # s
@@ -64,6 +67,13 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
+        self._astronauts_pad_positions = [[self._pads[3], self._pads[0]],
+                                          [self._pads[2], self._pads[4]],
+                                          [self._pads[0], self._pads[1]],
+                                          [self._pads[4], self._pads[2]],
+                                          [self._pads[1], self._pads[3]],
+                                          [self._pads[0], Pad.UP]]
+
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
         if event.type == pygame.KEYDOWN:
@@ -110,7 +120,7 @@ class LevelScene(Scene):
                         SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
                         return
             elif self._astronaut.has_reached_destination():
-                if self._nb_taxied_astronauts < len(self._astronauts) - 1:
+                if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
                     self._nb_taxied_astronauts += 1
                     self._astronaut = None
                     self._last_taxied_astronaut_time = time.time()
@@ -124,7 +134,7 @@ class LevelScene(Scene):
                 self._astronaut.wait()
         else:
             if time.time() - self._last_taxied_astronaut_time >= LevelScene._TIME_BETWEEN_ASTRONAUTS:
-                self._astronaut = self._astronauts[self._nb_taxied_astronauts]
+                self._astronaut = self.astronaut_spawner(self._nb_taxied_astronauts)
 
         self._taxi.update()
 
@@ -175,11 +185,17 @@ class LevelScene(Scene):
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
         self._gate.close()
-        self._astronauts = [Astronaut(self._pads[3], self._pads[0], 20.00),
-                            Astronaut(self._pads[2], self._pads[4], 20.00),
-                            Astronaut(self._pads[0], self._pads[1], 20.00),
-                            Astronaut(self._pads[4], self._pads[2], 20.00),
-                            Astronaut(self._pads[1], self._pads[3], 20.00),
-                            Astronaut(self._pads[0], Pad.UP, 20.00)]
+        #self._astronauts = [Astronaut(self._pads[3], self._pads[0], 20.00),
+        #                   Astronaut(self._pads[2], self._pads[4], 20.00),
+         #                   Astronaut(self._pads[0], self._pads[1], 20.00),
+          #                  Astronaut(self._pads[4], self._pads[2], 20.00),
+           #                 Astronaut(self._pads[1], self._pads[3], 20.00),
+          #                  Astronaut(self._pads[0], Pad.UP, 20.00)]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
+
+
+    def astronaut_spawner(self, astronaut_to_spawn) -> Astronaut :
+        return Astronaut(self._astronauts_pad_positions[astronaut_to_spawn][0],
+                                    self._astronauts_pad_positions[astronaut_to_spawn][1],
+                                    20.00)

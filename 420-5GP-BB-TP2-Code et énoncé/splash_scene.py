@@ -8,6 +8,9 @@ from game_settings import FILES
 class SplashScene(Scene):
     """ Scène titre (splash). """
 
+    def unload(self) -> None:
+        pass
+
     _FADE_OUT_DURATION: int = 1500  # ms
 
     def __init__(self) -> None:
