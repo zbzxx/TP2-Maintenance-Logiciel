@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 import pygame
 
+from game_settings import FILES
 from astronaut import Astronaut
 from hud import HUD
 from obstacle import Obstacle
@@ -27,7 +28,7 @@ class ImgSelector(Enum):
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
 
-    _TAXIS_FILENAME = "img/taxis.png"
+    _TAXIS_FILENAME = FILES['taxis_splash']
     _NB_TAXI_IMAGES = 6
 
     _FLAG_LEFT = 1 << 0  # indique si le taxi va vers la gauche
@@ -177,8 +178,13 @@ class Taxi(pygame.sprite.Sprite):
         if self._velocity_y > Taxi._MAX_VELOCITY_SMOOTH_LANDING or self._velocity_y < 0.0:#self._acceleration_y < 0.0:
             return False
 
-        if not self.rect.colliderect(pad.rect):
+        left_foot = self.rect.left + 5
+        right_foot = self.rect.right - 5
+
+        if not (pad.rect.collidepoint(left_foot, self.rect.bottom) and
+            pad.rect.collidepoint(right_foot, self.rect.bottom)):
             return False
+
 
         if pygame.sprite.collide_mask(self, pad):
             self.rect.bottom = pad.rect.top + 4
