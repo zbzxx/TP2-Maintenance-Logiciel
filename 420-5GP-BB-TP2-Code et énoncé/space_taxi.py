@@ -35,10 +35,12 @@ def main() -> None:
     pygame.init()
     pygame.mixer.init()
 
+    pygame_icon = pygame.image.load('img/icone_space_taxi.png')
+    pygame.display.set_icon(pygame_icon)
+
     settings = GameSettings()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Tribute to Space Taxi!")
-
     clock = pygame.time.Clock()
 
     show_fps = False

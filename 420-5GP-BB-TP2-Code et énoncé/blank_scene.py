@@ -32,7 +32,6 @@ class BlankScene(Scene):
         elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
         volume = max(0.0, 1.0 - (elapsed_time / BlankScene._FADE_OUT_DURATION))
         self._fade_out_start_time = pygame.time.get_ticks()
-        print(elapsed_time)
         if self.time_passed <=1.5:
             SceneManager().change_scene("splash", BlankScene._FADE_OUT_DURATION)
 
