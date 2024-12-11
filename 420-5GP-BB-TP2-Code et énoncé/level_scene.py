@@ -2,15 +2,11 @@ import pygame
 import time
 
 from astronaut import Astronaut
-from game_settings import GameSettings, FILES
-from gate import Gate
+from game_settings import GameSettings
 from hud import HUD
-from obstacle import Obstacle
 from pad import Pad
-from pump import Pump
 from scene import Scene
 from scene_manager import SceneManager
-from taxi import Taxi
 
 
 class LevelScene(Scene):
@@ -20,46 +16,42 @@ class LevelScene(Scene):
 
     _TIME_BETWEEN_ASTRONAUTS: int = 5  # s
 
-    def __init__(self, level: int) -> None:
+    def __init__(self, level : int) -> None:
         """
         Initiliase une instance de niveau de jeu.
         :param level: le numéro de niveau
         """
         super().__init__()
 
-        self._level = level
-        self._surface = pygame.image.load(FILES['space01']).convert_alpha()
-        self._music = pygame.mixer.Sound(FILES['music_lvl'])
+        self._pumps = None
+        self._obstacles = None
+        self._pads = None
+        self.level = level
+        self._surface = None
+        self._music = None
+        self._taxi = None
+        self._gate = None
+        self._obstacle_sprites = None
+        self._pump_sprites = None
+        self._pad_sprites = None
         self._music_started = False
         self._fade_out_start_time = None
-
         self._settings = GameSettings()
         self._hud = HUD()
 
-        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2))
 
-        self._gate = Gate(FILES['gate'], (582, 3))
 
-        self._obstacles = [Obstacle(FILES['south01'], (0, self._settings.SCREEN_HEIGHT - 141)),
-                           Obstacle(FILES['west01'], (0, 0)),
-                           Obstacle(FILES['east01'], (self._settings.SCREEN_WIDTH - 99, 0)),
-                           Obstacle(FILES['north01'], (0, 0)),
-                           Obstacle(FILES['obstacle01'], (840, 150)),
-                           Obstacle(FILES['obstacle02'], (250, 200))]
-        self._obstacle_sprites = pygame.sprite.Group()
-        self._obstacle_sprites.add(self._obstacles)
-
-        self._pumps = [Pump("img/pump.png", (305, 335))]
-        self._pump_sprites = pygame.sprite.Group()
-        self._pump_sprites.add(self._pumps)
-
-        self._pads = [Pad(1, FILES['pad01'], (650, self._settings.SCREEN_HEIGHT - 68), 5, 5),
-                      Pad(2, FILES['pad02'], (510, 205), 90, 15),
-                      Pad(3, FILES['pad03'], (150, 360), 10, 10),
-                      Pad(4, FILES['pad04'], (670, 480), 30, 280),
-                      Pad(5, FILES['pad05'], (1040, 380), 30, 120)]
-        self._pad_sprites = pygame.sprite.Group()
-        self._pad_sprites.add(self._pads)
+    def initialize_with_resources(self, resources: dict) -> None:
+        self._surface = resources['surface']
+        self._music = resources['music']
+        self._taxi = resources['taxi']
+        self._gate = resources['gate']
+        self._obstacle_sprites = resources['obstacle_sprites']
+        self._pump_sprites = resources['pump_sprites']
+        self._pad_sprites = resources['pad_sprites']
+        self._pads = resources['pads']
+        self._pumps = resources['pumps']
+        self._obstacles = resources['obstacles']
 
         self._reinitialize()
         self._hud.visible = True
