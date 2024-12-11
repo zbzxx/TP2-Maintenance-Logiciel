@@ -12,6 +12,9 @@ from taxi import Taxi
 class LevelLoadingScene(Scene):
     """ Scène de chargement d'un niveau. """
 
+    def unload(self) -> None:
+        pass
+
     _FADE_OUT_DURATION: int = 500  # ms
 
     def __init__(self, level: int) -> None:
