@@ -91,7 +91,7 @@ def quit_game() -> None:
 # def update_countdown(fps):
 
 
-def display_error_message():
+def display_error_message(file:str):
         # Initialize pygame
         # pygame.init()
 
@@ -111,7 +111,7 @@ def display_error_message():
         font_small = pygame.font.SysFont("Arial", 24)
 
         # Text content
-        error_text = "FATAL ERROR loading taxis.png."
+        error_text = f"FATAL ERROR loading {file}."
         timer_text = "Program will be terminated in {} seconds (or press ESCAPE to terminate now)."
 
         # Countdown timer
@@ -169,6 +169,9 @@ def display_error_message():
 if __name__ == '__main__':
     try:
         main()
-    except Exception as e:
-        print(e)
-        thread = Thread(target=display_error_message())
+    except FileNotFoundError as e:
+        # je ne pouvais pas avoir le file path donc..
+        # vous l'avez approuve donc
+        file = str(e).split("'")[1]
+        print(file)
+        thread = Thread(target=display_error_message(file))
