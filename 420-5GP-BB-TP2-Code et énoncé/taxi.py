@@ -93,16 +93,25 @@ class Taxi(pygame.sprite.Sprite):
             return round(self.rect.width / 9)
 
 
+
     def crash_on_anything(self, obs: Obstacle| Pad| Pump):
         """
               Vérifie si le taxi est en situation de crash contre un obstacle.
               :param obstacle: obstacle avec lequel vérifier
               :return: True si le taxi est en contact avec l'obstacle, False sinon
               """
+
+
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return False
+
         if self.rect.colliderect(obs.rect):
+
+
+
             if pygame.sprite.collide_mask(self, obs):
+                if self._astronaut:
+                    self._astronaut.set_trip_money(0.0)
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
