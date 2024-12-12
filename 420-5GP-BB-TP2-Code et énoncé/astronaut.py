@@ -3,6 +3,9 @@ import random
 import time
 
 from enum import Enum, auto
+
+from orca.debug import println
+
 from pad import Pad
 from game_settings import FILES
 
@@ -92,6 +95,11 @@ class Astronaut(pygame.sprite.Sprite):
             surface.blit(self.image, self.rect)
 
     def get_trip_money(self) -> float:
+
+        source= self._source_pad.astronaut_start
+        end = self._source_pad.astronaut_end
+        distance = source.distance_to(end)
+        print(distance)
         return self._trip_money
 
     def has_reached_destination(self) -> bool:
