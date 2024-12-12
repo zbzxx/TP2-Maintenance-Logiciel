@@ -199,18 +199,35 @@ class Taxi(pygame.sprite.Sprite):
             pad.rect.collidepoint(right_foot, self.rect.bottom)):
             return False
 
-
         if pygame.sprite.collide_mask(self, pad):
+            self._velocity_vector2 = pygame.math.Vector2(15.0, 0.0)
+
+            # Atterrissage réussi
             self.rect.bottom = pad.rect.top + 4
             self._pos_vector2.y = float(self.rect.y)
             self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
+
+            # Gérer l'effet de glisse
+            max_glide_distance = self.rect.width /2
+            glide_distance = 0.0
+            friction = 0.05
+
+            while abs(self._velocity_vector2.x) > 0 and glide_distance < max_glide_distance:
+                print(f"Position avant le glissement: {self.rect.x}")
+                pygame.time.delay(20)
+                self.rect.x += self._velocity_vector2.x
+                glide_distance += abs(self._velocity_vector2.x)
+                self._velocity_vector2.x -= friction * (1 if self._velocity_vector2.x > 0 else -1)
+                print(f"Glisse : vitesse_x={self._velocity_vector2.x}, distance={glide_distance}")
+
+            print(f"Position finale après glissement: {self.rect.x}")
+
             self._velocity_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._acceleration_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._pad_landed_on = pad
             if self._astronaut and self._astronaut.target_pad != Pad.UP and self._astronaut.target_pad.number == pad.number:
                 self.unboard_astronaut()
             return True
-
         return False
 
     def refuel_from(self, pump: Pump) -> bool:

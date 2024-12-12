@@ -62,5 +62,6 @@ FILES = {
     "gary_hey_sound" : "voices/gary_hey_01.mp3",
 
     "taxis_splash" : "img/taxis.png",
-    "pump" : "img/pump.png"
+    "pump" : "img/pump.png",
+    "level1" : "level1.cfg"
 }
