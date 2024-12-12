@@ -74,7 +74,6 @@ def main() -> None:
                     new_joystick = pygame.joystick.Joystick(event.device_index)
                     new_joystick.init()
                     settings.JOYSTICK.append(new_joystick)
-                    print(settings.JOYSTICK)
 
                 if event.type == pygame.JOYDEVICEREMOVED:
                     settings.JOYSTICK.clear()
