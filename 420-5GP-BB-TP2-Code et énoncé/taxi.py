@@ -309,7 +309,8 @@ class Taxi(pygame.sprite.Sprite):
             if keys[pygame.K_UP]:
                 self._flags &= ~Taxi._FLAG_TOP_REACTOR
                 self._flags |= Taxi._FLAG_BOTTOM_REACTOR
-                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
+                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER,
+                                           -Taxi._MAX_ACCELERATION_Y_UP)
                 if self._pad_landed_on:
                     self._pad_landed_on = None
 
@@ -341,7 +342,8 @@ class Taxi(pygame.sprite.Sprite):
             if self.settings.JOYSTICK[0].get_axis(4) < -0.1:
                 self._flags &= ~Taxi._FLAG_TOP_REACTOR
                 self._flags |= Taxi._FLAG_BOTTOM_REACTOR
-                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
+                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER,
+                                           -Taxi._MAX_ACCELERATION_Y_UP)
                 if self._pad_landed_on:
                     self._pad_landed_on = None
 

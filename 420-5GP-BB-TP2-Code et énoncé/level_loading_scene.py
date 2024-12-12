@@ -41,7 +41,7 @@ class LevelLoadingScene(Scene):
         resources = self.load_level()
 
         from scene_manager import SceneManager
-        SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION,resources)
+        SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION, resources)
 
     def update(self, delta_time: float) -> None:
         if not self._music_started:
