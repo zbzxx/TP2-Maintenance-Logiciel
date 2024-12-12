@@ -90,9 +90,9 @@ class Taxi(pygame.sprite.Sprite):
         facing = self._flags & Taxi._FLAG_LEFT
 
         if facing == Taxi._FLAG_LEFT :
-            return round(self.rect.width / 7)
+            return round(self.rect.width / 8)
         else:
-            return round(self.rect.width / 9)
+            return round(self.rect.width / 10)
 
 
 
@@ -225,6 +225,7 @@ class Taxi(pygame.sprite.Sprite):
             self._velocity_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._acceleration_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._pad_landed_on = pad
+            self._last_pos_y_land = self.rect.y
             if self._astronaut and self._astronaut.target_pad != Pad.UP and self._astronaut.target_pad.number == pad.number:
                 self.unboard_astronaut()
             return True
@@ -327,7 +328,16 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags |= Taxi._FLAG_BOTTOM_REACTOR
                 self._acceleration_vector2.y = max(self._acceleration_vector2.y - Taxi._BOTTOM_REACTOR_POWER,
                                            -Taxi._MAX_ACCELERATION_Y_UP)
-                if self._pad_landed_on:
+
+                if self._taking_off:
+                    if self._last_pos_y_land - 5 > self.rect.y :
+                        if gear_out:
+                            self.activate_gear()
+                        self._taking_off = False
+
+
+                if self._pad_landed_on :
+                    self._taking_off = True
                     self._pad_landed_on = None
 
             if not (keys[pygame.K_UP] or keys[pygame.K_DOWN]):
@@ -360,12 +370,22 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags |= Taxi._FLAG_BOTTOM_REACTOR
                 self._acceleration_vector2.y = max(self._acceleration_vector2.y - Taxi._BOTTOM_REACTOR_POWER,
                                                    -Taxi._MAX_ACCELERATION_Y_UP)
+
+                if self._taking_off:
+                    if self._last_pos_y_land - 5 > self.rect.y :
+                        if gear_out:
+                            self.activate_gear()
+                        self._taking_off = False
+
                 if self._pad_landed_on:
+                    self._taking_off = True
                     self._pad_landed_on = None
 
             if 0.1 > self.settings.JOYSTICK[0].get_axis(4) > -0.1:
                 self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
                 self._acceleration_vector2.y = 0.0
+
+
 
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """
