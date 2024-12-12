@@ -253,7 +253,8 @@ class Taxi(pygame.sprite.Sprite):
         if not self.rect.colliderect(pump.rect):
             return False
         print("refueling")
-        self.fuel_remaining+=0.1
+        if self.fuel_remaining<=5.0:
+            self.fuel_remaining+=0.1
         return True
 
     def reset(self) -> None:
