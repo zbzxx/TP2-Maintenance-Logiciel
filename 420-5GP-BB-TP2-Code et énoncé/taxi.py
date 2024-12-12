@@ -90,7 +90,7 @@ class Taxi(pygame.sprite.Sprite):
         facing = self._flags & Taxi._FLAG_LEFT
 
         if facing == Taxi._FLAG_LEFT :
-            return round(self.rect.width / 4)
+            return round(self.rect.width / 7)
         else:
             return round(self.rect.width / 9)
 
