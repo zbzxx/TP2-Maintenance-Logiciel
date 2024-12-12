@@ -1,6 +1,7 @@
 from enum import Enum, auto
 
 import pygame
+from orca.braille import killFlash
 
 from game_settings import FILES
 from astronaut import Astronaut, AstronautState
@@ -74,6 +75,7 @@ class Taxi(pygame.sprite.Sprite):
         self._crash_sound = pygame.mixer.Sound(FILES['crash_sound'])
 
         self._surfaces, self._masks, self._maskReactor = Taxi._load_and_build_surfaces()
+        self.fuel_remaining = 5.0
 
         self._reinitialize()
 
@@ -116,6 +118,7 @@ class Taxi(pygame.sprite.Sprite):
                 self._velocity_x = 0.0
                 self._velocity_y = 0.0
                 self._acceleration_x = 0.0
+
                 self._acceleration_y = Taxi._CRASH_ACCELERATION
                 return True
 
@@ -165,16 +168,15 @@ class Taxi(pygame.sprite.Sprite):
 
             return False
 
-        if astronaut._state == AstronautState.REACHED_DESTINATION:
-            1 / 0
+
 
         if self.rect.colliderect(astronaut.rect):
             self._select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
                self._select_image( False )
-               if astronaut._state == AstronautState.REACHED_DESTINATION:
+               # if astronaut._state == AstronautState.REACHED_DESTINATION:
                    # todo: testing
-                   1 / 0
+                   # 1 / 0
                return True
         self._select_image( False )
         return False
@@ -249,7 +251,8 @@ class Taxi(pygame.sprite.Sprite):
 
         if not self.rect.colliderect(pump.rect):
             return False
-
+        print("refueling")
+        self.fuel_remaining+=0.1
         return True
 
     def reset(self) -> None:
@@ -297,8 +300,28 @@ class Taxi(pygame.sprite.Sprite):
         else:
             self._reactor_sound.set_volume(0)
 
+
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
         self._select_image(False)
+        self.drain_fuel()
+
+    # draine l'escence du taxi quand il utilise ses reacteurs
+    def drain_fuel(self) -> None:
+        if self.fuel_remaining < 0 & self._flags & Taxi._FLAG_DESTROYED != Taxi._FLAG_DESTROYED :
+            if self._astronaut:
+                self._astronaut.set_trip_money(0.0)
+            self._flags = self._FLAG_DESTROYED
+            self.fuel_remaining = 0.0
+            # print("no fuel")
+            self._accelerationk_y = Taxi._CRASH_ACCELERATION
+        else:
+            if Taxi._FLAG_BOTTOM_REACTOR:
+                self.fuel_remaining-= self._BOTTOM_REACTOR_POWER
+            if Taxi._FLAG_TOP_REACTOR:
+                self.fuel_remaining-= self._TOP_REACTOR_POWER
+            if Taxi._FLAG_REAR_REACTOR:
+                self.fuel_remaining-= self._REAR_REACTOR_POWER
+        # print(self.fuel_remaining)
 
     def _handle_keys(self) -> None:
         """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
@@ -395,7 +418,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._pad_landed_on = None
         self._taking_off = False
-
+        self.fuel_remaining = 5.0
         self._astronaut = None
         self._hud.set_trip_money(0.0)
 
