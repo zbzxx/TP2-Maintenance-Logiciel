@@ -21,8 +21,8 @@ class GameSettings:
         if not hasattr(self, '_initialized'):
             self.screen = None
             self.pad_font = pygame.font.Font("fonts/boombox2.ttf", 11)
-
             self._initialized = True
+            self.joystick = []
 
 
 FILES = {

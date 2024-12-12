@@ -23,7 +23,7 @@ class LevelScene(Scene):
 
     _TIME_BETWEEN_ASTRONAUTS: int = 5  # s
 
-    def __init__(self, level: int) -> None:
+    def __init__(self, level: int, settings: GameSettings) -> None:
         """
         Initiliase une instance de niveau de jeu.
         :param level: le numéro de niveau
@@ -36,10 +36,10 @@ class LevelScene(Scene):
         self._music_started = False
         self._fade_out_start_time = None
 
-        self._settings = GameSettings()
+        self._settings = settings
         self._hud = HUD()
 
-        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2))
+        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2), self._settings)
 
         self._gate = Gate(FILES['gate'], (582, 3))
 
@@ -78,12 +78,20 @@ class LevelScene(Scene):
         """ Gère les événements PyGame. """
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and self._taxi.is_destroyed():
-                self._taxi.reset()
-                self._retry_current_astronaut()
+                self.reset_taxi()
                 return
 
+        if self._settings.joystick :
+            if event.type == pygame.JOYBUTTONDOWN:
+                if (event.button == 9 or 1) and self._taxi.is_destroyed():
+                    self.reset_taxi()
+                    return
         if self._taxi:
             self._taxi.handle_event(event)
+
+    def reset_taxi(self) -> None:
+        self._taxi.reset()
+        self._retry_current_astronaut()
 
     def update(self, delta_time: float) -> None:
         """

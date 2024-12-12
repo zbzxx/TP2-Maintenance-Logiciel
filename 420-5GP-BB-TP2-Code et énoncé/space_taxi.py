@@ -26,10 +26,13 @@ from scene_manager import SceneManager
 from splash_scene import SplashScene
 
 
+
 def main() -> None:
     """ Programme principal. """
     pygame.init()
     pygame.mixer.init()
+    pygame.joystick.init()
+
 
     settings = GameSettings()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
@@ -44,20 +47,35 @@ def main() -> None:
 
     fixed_time_step = 1/settings.FPS
 
+
     scene_manager = SceneManager()
-    scene_manager.add_scene("splash", SplashScene())
-    scene_manager.add_scene("level1_load", LevelLoadingScene(1))
-    scene_manager.add_scene("level1", LevelScene(1))
-    scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+    scene_manager.add_scene("splash", SplashScene(settings))
+    scene_manager.add_scene("level1_load", LevelLoadingScene(1, settings))
+    scene_manager.add_scene("level1", LevelScene(1, settings))
+    scene_manager.add_scene("level2_load", LevelLoadingScene(2, settings))
 
     scene_manager.set_scene("splash")
 
     try:
         while True:
 
+
             clock.tick(settings.FPS)
 
             for event in pygame.event.get():
+                if event.type == pygame.JOYDEVICEADDED:
+                    new_joystick = pygame.joystick.Joystick(event.device_index)
+                    new_joystick.init()
+                    settings.joystick.append(new_joystick)
+                    print(settings.joystick)
+
+                if event.type == pygame.JOYDEVICEREMOVED:
+                    settings.joystick = []
+
+                if settings.joystick:
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 8:
+                            quit_game()
                 if event.type == pygame.QUIT:
                     quit_game()
                 scene_manager.handle_event(event)

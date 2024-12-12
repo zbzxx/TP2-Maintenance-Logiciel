@@ -2,7 +2,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
-from game_settings import FILES
+from game_settings import FILES, GameSettings
 
 
 class LevelLoadingScene(Scene):
@@ -13,8 +13,9 @@ class LevelLoadingScene(Scene):
 
     _FADE_OUT_DURATION: int = 500  # ms
 
-    def __init__(self, level: int) -> None:
+    def __init__(self, level: int, settings: GameSettings) -> None:
         super().__init__()
+        self._settings = settings
         self._level = level
         self._surface = pygame.image.load(FILES['loading']).convert_alpha()
         self._music = pygame.mixer.Sound(FILES['music_loading'])
@@ -22,10 +23,18 @@ class LevelLoadingScene(Scene):
         self._fade_out_start_time = None
 
     def handle_event(self, event: pygame.event.Event) -> None:
+        if self._settings.joystick:
+            if event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 9 or event.button == 1:
+                    self.start_level()
+
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                self._fade_out_start_time = pygame.time.get_ticks()
-                SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
+                self.start_level()
+
+    def start_level(self) -> None:
+        self._fade_out_start_time = pygame.time.get_ticks()
+        SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
 
     def update(self, delta_time: float) -> None:
         if not self._music_started:
