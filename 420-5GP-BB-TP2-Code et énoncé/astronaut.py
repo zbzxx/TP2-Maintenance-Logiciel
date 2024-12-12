@@ -82,11 +82,13 @@ class Astronaut(pygame.sprite.Sprite):
         self._last_frame_time = time.time()
 
         source = self._source_pad.astronaut_start
-        end = self._source_pad.astronaut_end
+        end = self.target_pad.astronaut_start
 
         print(source)
         print(end)
         distance = source.distance_to(end)
+        print(distance)
+        # distance = 0
         self.set_trip_money(distance)
 
     @property
@@ -160,10 +162,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._pos_x = float(self.rect.x)
 
     def set_trip_money(self, trip_money: float) -> None:
-        # start = self._source_pad.astronaut_start
-        # end = self._source_pad.astronaut_end
-        # distance = start.distance_to(end)
-        # money = distance * 10
+
         self._trip_money = trip_money
 
     def update(self, *args, **kwargs) -> None:
