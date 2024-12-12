@@ -8,7 +8,7 @@ from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
 from pump import Pump
-from game_settings import FILES
+from game_settings import FILES, GameSettings
 
 
 class ImgSelector(Enum):
@@ -60,6 +60,8 @@ class Taxi(pygame.sprite.Sprite):
         :param pos:
         """
         super(Taxi, self).__init__()
+
+        self.settings = GameSettings()
 
         self._initial_pos = pos
 
@@ -125,16 +127,26 @@ class Taxi(pygame.sprite.Sprite):
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements du taxi. """
+
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                if self._pad_landed_on is None:
-                    if self._flags & Taxi._FLAG_GEAR_OUT != Taxi._FLAG_GEAR_OUT:
-                        # pas de réacteurs du dessus et arrière lorsque le train d'atterrissage est sorti
-                        self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR)
+                self.activate_gear()
 
-                    self._flags ^= Taxi._FLAG_GEAR_OUT  # flip le bit pour refléter le nouvel état
+        if self.settings.JOYSTICK:
+            if event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 1:
+                    self.activate_gear()
 
-                    self._select_image( False )
+    def activate_gear(self) -> None :
+        if self._pad_landed_on is None:
+            if self._flags & Taxi._FLAG_GEAR_OUT != Taxi._FLAG_GEAR_OUT:
+                # pas de réacteurs du dessus et arrière lorsque le train d'atterrissage est sorti
+                self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR)
+
+            self._flags ^= Taxi._FLAG_GEAR_OUT  # flip le bit pour refléter le nouvel état
+
+            self._select_image(False)
 
     def has_exited(self) -> bool:
         """
@@ -274,37 +286,72 @@ class Taxi(pygame.sprite.Sprite):
 
         gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
 
-        if not gear_out:
-            if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
-                self._flags |= Taxi._FLAG_REAR_REACTOR
-                if keys[pygame.K_LEFT]:
-                    self._flags |= Taxi._FLAG_LEFT
-                    self._acceleration_x = max(self._acceleration_x - Taxi._REAR_REACTOR_POWER,
-                                               -Taxi._MAX_ACCELERATION_X)
-                elif keys[pygame.K_RIGHT]:
-                    self._flags &= ~Taxi._FLAG_LEFT
-                    self._acceleration_x = min(self._acceleration_x + Taxi._REAR_REACTOR_POWER,
-                                               Taxi._MAX_ACCELERATION_X)
-            else:
-                self._flags &= ~Taxi._FLAG_REAR_REACTOR
-                self._acceleration_x = 0.0
+        if not self.settings.JOYSTICK :
+            if not gear_out:
+                if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
+                    self._flags |= Taxi._FLAG_REAR_REACTOR
+                    if keys[pygame.K_LEFT]:
+                        self._flags |= Taxi._FLAG_LEFT
+                        self._acceleration_x = max(self._acceleration_x - Taxi._REAR_REACTOR_POWER,
+                                                   -Taxi._MAX_ACCELERATION_X)
+                    elif keys[pygame.K_RIGHT]:
+                        self._flags &= ~Taxi._FLAG_LEFT
+                        self._acceleration_x = min(self._acceleration_x + Taxi._REAR_REACTOR_POWER,
+                                                   Taxi._MAX_ACCELERATION_X)
+                else:
+                    self._flags &= ~Taxi._FLAG_REAR_REACTOR
+                    self._acceleration_x = 0.0
 
-            if keys[pygame.K_DOWN]:
-                self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
-                self._flags |= Taxi._FLAG_TOP_REACTOR
-                self._acceleration_y = min(self._acceleration_y + Taxi._TOP_REACTOR_POWER,
-                                           Taxi._MAX_ACCELERATION_Y_DOWN)
+                if keys[pygame.K_DOWN]:
+                    self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
+                    self._flags |= Taxi._FLAG_TOP_REACTOR
+                    self._acceleration_y = min(self._acceleration_y + Taxi._TOP_REACTOR_POWER,
+                                               Taxi._MAX_ACCELERATION_Y_DOWN)
 
-        if keys[pygame.K_UP]:
-            self._flags &= ~Taxi._FLAG_TOP_REACTOR
-            self._flags |= Taxi._FLAG_BOTTOM_REACTOR
-            self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
-            if self._pad_landed_on:
-                self._pad_landed_on = None
+            if keys[pygame.K_UP]:
+                self._flags &= ~Taxi._FLAG_TOP_REACTOR
+                self._flags |= Taxi._FLAG_BOTTOM_REACTOR
+                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER,
+                                           -Taxi._MAX_ACCELERATION_Y_UP)
+                if self._pad_landed_on:
+                    self._pad_landed_on = None
 
-        if not (keys[pygame.K_UP] or keys[pygame.K_DOWN]):
-            self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
-            self._acceleration_y = 0.0
+            if not (keys[pygame.K_UP] or keys[pygame.K_DOWN]):
+                self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
+                self._acceleration_y = 0.0
+        else:
+            if not gear_out:
+                if self.settings.JOYSTICK[0].get_axis(3) < -0.1 or self.settings.JOYSTICK[0].get_axis(3) > 0.1:
+                    self._flags |= Taxi._FLAG_REAR_REACTOR
+                    if self.settings.JOYSTICK[0].get_axis(3) < -0.1:
+                        self._flags |= Taxi._FLAG_LEFT
+                        self._acceleration_x = max(self._acceleration_x - Taxi._REAR_REACTOR_POWER,
+                                                   -Taxi._MAX_ACCELERATION_X)
+                    elif self.settings.JOYSTICK[0].get_axis(3) > 0.1:
+                        self._flags &= ~Taxi._FLAG_LEFT
+                        self._acceleration_x = min(self._acceleration_x + Taxi._REAR_REACTOR_POWER,
+                                                   Taxi._MAX_ACCELERATION_X)
+                else:
+                    self._flags &= ~Taxi._FLAG_REAR_REACTOR
+                    self._acceleration_x = 0.0
+
+                if self.settings.JOYSTICK[0].get_axis(4):
+                    self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
+                    self._flags |= Taxi._FLAG_TOP_REACTOR
+                    self._acceleration_y = min(self._acceleration_y + Taxi._TOP_REACTOR_POWER,
+                                               Taxi._MAX_ACCELERATION_Y_DOWN)
+
+            if self.settings.JOYSTICK[0].get_axis(4) < -0.1:
+                self._flags &= ~Taxi._FLAG_TOP_REACTOR
+                self._flags |= Taxi._FLAG_BOTTOM_REACTOR
+                self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER,
+                                           -Taxi._MAX_ACCELERATION_Y_UP)
+                if self._pad_landed_on:
+                    self._pad_landed_on = None
+
+            if 0.1 > self.settings.JOYSTICK[0].get_axis(4) > -0.1:
+                self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
+                self._acceleration_y = 0.0
 
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """

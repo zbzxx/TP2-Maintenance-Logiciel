@@ -30,10 +30,13 @@ from splash_scene import SplashScene
 from blank_scene import BlankScene
 
 
+
 def main() -> None:
     """ Programme principal. """
     pygame.init()
     pygame.mixer.init()
+    pygame.joystick.init()
+
 
     pygame_icon = pygame.image.load('img/icone_space_taxi.png')
     pygame.display.set_icon(pygame_icon)
@@ -50,6 +53,7 @@ def main() -> None:
 
     fixed_time_step = 1/settings.FPS
 
+
     scene_manager = SceneManager()
     scene_manager.add_scene("blank", BlankScene())
     scene_manager.add_scene("splash", SplashScene())
@@ -62,9 +66,23 @@ def main() -> None:
     try:
         while True:
 
+
             clock.tick(settings.FPS)
 
             for event in pygame.event.get():
+                if event.type == pygame.JOYDEVICEADDED:
+                    new_joystick = pygame.joystick.Joystick(event.device_index)
+                    new_joystick.init()
+                    settings.JOYSTICK.append(new_joystick)
+                    print(settings.JOYSTICK)
+
+                if event.type == pygame.JOYDEVICEREMOVED:
+                    settings.JOYSTICK.clear()
+
+                if settings.JOYSTICK:
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 8:
+                            quit_game()
                 if event.type == pygame.QUIT:
                     quit_game()
                 scene_manager.handle_event(event)
