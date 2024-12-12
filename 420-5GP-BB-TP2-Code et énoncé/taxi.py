@@ -104,10 +104,7 @@ class Taxi(pygame.sprite.Sprite):
 
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return False
-
         if self.rect.colliderect(obs.rect):
-
-
 
             if pygame.sprite.collide_mask(self, obs):
                 if self._astronaut:

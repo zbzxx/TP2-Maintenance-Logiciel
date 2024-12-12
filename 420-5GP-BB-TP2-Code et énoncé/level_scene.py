@@ -62,7 +62,7 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
-        self._astronauts_pad_positions = [[self._pads[1], Pad.UP],
+        self._astronauts_pad_positions = [[self._pads[1], self._pads[4]],
                                           [self._pads[2], self._pads[4]],
                                           [self._pads[0], self._pads[1]],
                                           [self._pads[4], self._pads[2]],
