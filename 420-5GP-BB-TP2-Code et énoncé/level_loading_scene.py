@@ -1,3 +1,5 @@
+import configparser
+
 import pygame
 
 from gate import Gate
@@ -62,32 +64,51 @@ class LevelLoadingScene(Scene):
         return self._surface
 
     def load_level(self) -> dict :
-        surface = pygame.image.load(FILES['space01']).convert_alpha()
-        music = pygame.mixer.Sound(FILES['music_lvl'])
+        config = configparser.ConfigParser()
+        config.read(FILES['level1'])
 
-        taxi = Taxi((GameSettings.SCREEN_WIDTH / 2, GameSettings.SCREEN_HEIGHT / 2))
-        gate = Gate(FILES['gate'], (582, 3))
+        # Charger les données générales
+        surface = pygame.image.load(config['general']['background_image']).convert_alpha()
+        music = pygame.mixer.Sound(config['general']['background_music'])
 
-        obstacles = [
-            Obstacle(FILES['south01'], (0, GameSettings.SCREEN_HEIGHT - 141)),
-            Obstacle(FILES['west01'], (0, 0)),
-            Obstacle(FILES['east01'], (GameSettings.SCREEN_WIDTH - 99, 0)),
-            Obstacle(FILES['north01'], (0, 0)),
-            Obstacle(FILES['obstacle01'], (840, 150)),
-            Obstacle(FILES['obstacle02'], (250, 200))
-        ]
-        obstacle_sprites = pygame.sprite.Group(obstacles)
+        # Charger le taxi
+        taxi_x, taxi_y = map(int, config['taxi']['position'].split(','))
+        taxi = Taxi((taxi_x, taxi_y))
 
-        pumps = [Pump(FILES['pump'], (305, 335))]
+        # Charger le portail
+        gate_image = config['gate']['image']
+        gate_x, gate_y = map(int, config['gate']['position'].split(','))
+        gate = Gate(gate_image, (gate_x, gate_y))
+
+        # Charger les settings
+        screen_width = int(config['settings']['screen_width'])
+        screen_height = int(config['settings']['screen_height'])
+
+        # Charger les obstacles
+        obstacles = []
+        for key in config['obstacles']:
+            image, x, y = config['obstacles'][key].split(',')
+            # Résoudre les expressions dynamiques
+            x = eval(x.strip(), {'screen_width': screen_width, 'screen_height': screen_height})
+            y = eval(y.strip(), {'screen_width': screen_width, 'screen_height': screen_height})
+            obstacles.append(Obstacle(image.strip(), (int(x), int(y))))
+
+        # Charger les pompes
+        pumps = []
+        for key in config['pumps']:
+            image, x, y = config['pumps'][key].split(',')
+            pumps.append(Pump(image.strip(), (int(x), int(y))))
         pump_sprites = pygame.sprite.Group(pumps)
 
-        pads = [
-            Pad(1, FILES['pad01'], (650, GameSettings.SCREEN_HEIGHT - 68), 5, 5),
-                      Pad(2, FILES['pad02'], (510, 205), 90, 15),
-                      Pad(3, FILES['pad03'], (150, 360), 10, 10),
-                      Pad(4, FILES['pad04'], (670, 480), 30, 280),
-                      Pad(5, FILES['pad05'], (1040, 380), 30, 120)
-        ]
+        # Charger les pads
+        pads = []
+        for key in config['pads']:
+            pad_data = config['pads'][key].split(',')
+            id_ = int(key[3:])  # Extraire l'ID à partir du nom (e.g., "pad1" -> 1)
+            image = pad_data[0].strip()
+            x, y = map(int, pad_data[1:3])
+            width, height = map(int, pad_data[3:])
+            pads.append(Pad(id_, image, (x, y), width, height))
         pad_sprites = pygame.sprite.Group(pads)
 
         return {
@@ -95,7 +116,7 @@ class LevelLoadingScene(Scene):
             'music': music,
             'taxi': taxi,
             'gate': gate,
-            'obstacle_sprites': obstacle_sprites,
+            'obstacle_sprites': pygame.sprite.Group(obstacles),
             'pump_sprites': pump_sprites,
             'pad_sprites': pad_sprites,
             'pads' : pads,
