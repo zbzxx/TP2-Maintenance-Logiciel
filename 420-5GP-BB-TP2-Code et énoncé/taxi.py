@@ -3,7 +3,7 @@ from enum import Enum, auto
 import pygame
 
 from game_settings import FILES
-from astronaut import Astronaut
+from astronaut import Astronaut, AstronautState
 from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
@@ -150,6 +150,8 @@ class Taxi(pygame.sprite.Sprite):
         :return: True si le taxi frappe l'astronaute, False sinon
         """
         if self._pad_landed_on or astronaut.is_onboard():
+            if astronaut._state == AstronautState.REACHED_DESTINATION:
+                1/0
             return False
 
 
