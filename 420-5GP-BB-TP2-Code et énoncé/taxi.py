@@ -90,9 +90,9 @@ class Taxi(pygame.sprite.Sprite):
         facing = self._flags & Taxi._FLAG_LEFT
 
         if facing == Taxi._FLAG_LEFT :
-            return round(self.rect.width / 8)
+            return round(self.rect.width / 4)
         else:
-            return round(self.rect.width / 10)
+            return round(self.rect.width / 7)
 
 
 
@@ -200,7 +200,8 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if pygame.sprite.collide_mask(self, pad):
-            self._velocity_vector2 = pygame.math.Vector2(15.0, 0.0)
+            #TODO : fix le sliding, ca brise le hitbox ou la position logique du taxi
+            #self._velocity_vector2 = pygame.math.Vector2(15.0, 0.0)
 
             # Atterrissage réussi
             self.rect.bottom = pad.rect.top + 4
@@ -208,19 +209,19 @@ class Taxi(pygame.sprite.Sprite):
             self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
 
             # Gérer l'effet de glisse
-            max_glide_distance = self.rect.width /2
-            glide_distance = 0.0
-            friction = 0.05
+            #max_glide_distance = self.rect.width /2
+            #glide_distance = 0.0
+            #friction = 0.05
 
-            while abs(self._velocity_vector2.x) > 0 and glide_distance < max_glide_distance:
-                print(f"Position avant le glissement: {self.rect.x}")
-                pygame.time.delay(20)
-                self.rect.x += self._velocity_vector2.x
-                glide_distance += abs(self._velocity_vector2.x)
-                self._velocity_vector2.x -= friction * (1 if self._velocity_vector2.x > 0 else -1)
-                print(f"Glisse : vitesse_x={self._velocity_vector2.x}, distance={glide_distance}")
+            #while abs(self._velocity_vector2.x) > 0 and glide_distance < max_glide_distance:
+            #    print(f"Position avant le glissement: {self.rect.x}")
+             #   pygame.time.delay(20)
+             #   self.rect.x += self._velocity_vector2.x
+             #   glide_distance += abs(self._velocity_vector2.x)
+             #   self._velocity_vector2.x -= friction * (1 if self._velocity_vector2.x > 0 else -1)
+             #   print(f"Glisse : vitesse_x={self._velocity_vector2.x}, distance={glide_distance}")
 
-            print(f"Position finale après glissement: {self.rect.x}")
+            #print(f"Position finale après glissement: {self.rect.x}")
 
             self._velocity_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._acceleration_vector2 = pygame.math.Vector2(0.0, 0.0)
