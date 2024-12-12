@@ -13,9 +13,9 @@ class LevelLoadingScene(Scene):
 
     _FADE_OUT_DURATION: int = 500  # ms
 
-    def __init__(self, level: int, settings: GameSettings) -> None:
+    def __init__(self, level: int) -> None:
         super().__init__()
-        self._settings = settings
+        self._settings = GameSettings
         self._level = level
         self._surface = pygame.image.load(FILES['loading']).convert_alpha()
         self._music = pygame.mixer.Sound(FILES['music_loading'])
@@ -23,7 +23,7 @@ class LevelLoadingScene(Scene):
         self._fade_out_start_time = None
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        if self._settings.joystick:
+        if self._settings.JOYSTICK:
             if event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 9 or event.button == 1:
                     self.start_level()

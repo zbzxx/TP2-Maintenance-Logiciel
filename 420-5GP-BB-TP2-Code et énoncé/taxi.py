@@ -53,14 +53,14 @@ class Taxi(pygame.sprite.Sprite):
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
     _GRAVITY_ADD = 0.005  # la gravité est ajoutée à la vitesse verticale
 
-    def __init__(self, pos: tuple, settings : GameSettings) -> None:
+    def __init__(self, pos: tuple) -> None:
         """
         Initialise une instance de taxi.
         :param pos:
         """
         super(Taxi, self).__init__()
 
-        self.settings = settings
+        self.settings = GameSettings
 
         self._initial_pos = pos
 
@@ -170,7 +170,7 @@ class Taxi(pygame.sprite.Sprite):
             if event.key == pygame.K_SPACE:
                 self.activate_gear()
                 
-        if self.settings.joystick:
+        if self.settings.JOYSTICK:
             if event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 1:
                     self.activate_gear()
@@ -317,7 +317,7 @@ class Taxi(pygame.sprite.Sprite):
 
         gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
 
-        if not self.settings.joystick :
+        if not self.settings.JOYSTICK :
             if keys[pygame.K_LEFT] and not gear_out:
                 self._flags |= Taxi._FLAG_LEFT | Taxi._FLAG_REAR_REACTOR
                 self._acceleration_x = max(self._acceleration_x - Taxi._REAR_REACTOR_POWER, -Taxi._MAX_ACCELERATION_X)
@@ -349,26 +349,26 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
                 self._acceleration_y = 0.0
         else:
-            if self.settings.joystick[0].get_axis(3) < -0.1 and not gear_out:
+            if self.settings.JOYSTICK[0].get_axis(3) < -0.1 and not gear_out:
                 self._flags |= Taxi._FLAG_LEFT | Taxi._FLAG_REAR_REACTOR
                 self._acceleration_x = max(self._acceleration_x - Taxi._REAR_REACTOR_POWER, -Taxi._MAX_ACCELERATION_X)
 
-            if self.settings.joystick[0].get_axis(3) > 0.1 and not gear_out:
+            if self.settings.JOYSTICK[0].get_axis(3) > 0.1 and not gear_out:
                 self._flags &= ~Taxi._FLAG_LEFT
                 self._flags |= self._FLAG_REAR_REACTOR
                 self._acceleration_x = min(self._acceleration_x + Taxi._REAR_REACTOR_POWER, Taxi._MAX_ACCELERATION_X)
 
-            if 0.1 > self.settings.joystick[0].get_axis(3) > -0.1:
+            if 0.1 > self.settings.JOYSTICK[0].get_axis(3) > -0.1:
                 self._flags &= ~Taxi._FLAG_REAR_REACTOR
                 self._acceleration_x = 0.0
 
-            if self.settings.joystick[0].get_axis(4) > 0.1 and not gear_out:
+            if self.settings.JOYSTICK[0].get_axis(4) > 0.1 and not gear_out:
                 self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
                 self._flags |= Taxi._FLAG_TOP_REACTOR
                 self._acceleration_y = min(self._acceleration_y + Taxi._TOP_REACTOR_POWER,
                                            Taxi._MAX_ACCELERATION_Y_DOWN)
 
-            if self.settings.joystick[0].get_axis(4) < -0.1:
+            if self.settings.JOYSTICK[0].get_axis(4) < -0.1:
                 self._flags &= ~Taxi._FLAG_TOP_REACTOR
                 self._flags |= Taxi._FLAG_BOTTOM_REACTOR
                 self._acceleration_y = max(self._acceleration_y - Taxi._BOTTOM_REACTOR_POWER,
@@ -376,7 +376,7 @@ class Taxi(pygame.sprite.Sprite):
                 if self._pad_landed_on:
                     self._pad_landed_on = None
 
-            if 0.1 > self.settings.joystick[0].get_axis(4) > -0.1:
+            if 0.1 > self.settings.JOYSTICK[0].get_axis(4) > -0.1:
                 self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
                 self._acceleration_y = 0.0
 

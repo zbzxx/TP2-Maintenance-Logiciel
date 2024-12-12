@@ -23,7 +23,7 @@ class LevelScene(Scene):
 
     _TIME_BETWEEN_ASTRONAUTS: int = 5  # s
 
-    def __init__(self, level: int, settings: GameSettings) -> None:
+    def __init__(self, level: int) -> None:
         """
         Initiliase une instance de niveau de jeu.
         :param level: le numéro de niveau
@@ -36,10 +36,10 @@ class LevelScene(Scene):
         self._music_started = False
         self._fade_out_start_time = None
 
-        self._settings = settings
+        self._settings = GameSettings
         self._hud = HUD()
 
-        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2), self._settings)
+        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2))
 
         self._gate = Gate(FILES['gate'], (582, 3))
 
@@ -81,7 +81,7 @@ class LevelScene(Scene):
                 self.reset_taxi()
                 return
 
-        if self._settings.joystick :
+        if self._settings.JOYSTICK :
             if event.type == pygame.JOYBUTTONDOWN:
                 if (event.button == 9 or 1) and self._taxi.is_destroyed():
                     self.reset_taxi()
@@ -193,12 +193,6 @@ class LevelScene(Scene):
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
         self._gate.close()
-        #self._astronauts = [Astronaut(self._pads[3], self._pads[0], 20.00),
-        #                   Astronaut(self._pads[2], self._pads[4], 20.00),
-         #                   Astronaut(self._pads[0], self._pads[1], 20.00),
-          #                  Astronaut(self._pads[4], self._pads[2], 20.00),
-           #                 Astronaut(self._pads[1], self._pads[3], 20.00),
-          #                  Astronaut(self._pads[0], Pad.UP, 20.00)]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
 

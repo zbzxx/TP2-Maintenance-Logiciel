@@ -49,10 +49,10 @@ def main() -> None:
 
 
     scene_manager = SceneManager()
-    scene_manager.add_scene("splash", SplashScene(settings))
-    scene_manager.add_scene("level1_load", LevelLoadingScene(1, settings))
-    scene_manager.add_scene("level1", LevelScene(1, settings))
-    scene_manager.add_scene("level2_load", LevelLoadingScene(2, settings))
+    scene_manager.add_scene("splash", SplashScene())
+    scene_manager.add_scene("level1_load", LevelLoadingScene(1))
+    scene_manager.add_scene("level1", LevelScene(1))
+    scene_manager.add_scene("level2_load", LevelLoadingScene(2))
 
     scene_manager.set_scene("splash")
 
@@ -66,13 +66,13 @@ def main() -> None:
                 if event.type == pygame.JOYDEVICEADDED:
                     new_joystick = pygame.joystick.Joystick(event.device_index)
                     new_joystick.init()
-                    settings.joystick.append(new_joystick)
-                    print(settings.joystick)
+                    settings.JOYSTICK.append(new_joystick)
+                    print(settings.JOYSTICK)
 
                 if event.type == pygame.JOYDEVICEREMOVED:
-                    settings.joystick = []
+                    settings.JOYSTICK.clear()
 
-                if settings.joystick:
+                if settings.JOYSTICK:
                     if event.type == pygame.JOYBUTTONDOWN:
                         if event.button == 8:
                             quit_game()
