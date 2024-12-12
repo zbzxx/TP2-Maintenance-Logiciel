@@ -3,6 +3,9 @@ import random
 import time
 
 from enum import Enum, auto
+
+from orca.debug import println
+
 from pad import Pad
 from game_settings import FILES
 
@@ -78,6 +81,14 @@ class Astronaut(pygame.sprite.Sprite):
         self._current_frame = 0
         self._last_frame_time = time.time()
 
+        source = self._source_pad.astronaut_start
+        end = self._source_pad.astronaut_end
+
+        print(source)
+        print(end)
+        distance = source.distance_to(end)
+        self.set_trip_money(distance)
+
     @property
     def source_pad(self) -> Pad:
         return self._source_pad
@@ -149,6 +160,10 @@ class Astronaut(pygame.sprite.Sprite):
         self._pos_x = float(self.rect.x)
 
     def set_trip_money(self, trip_money: float) -> None:
+        # start = self._source_pad.astronaut_start
+        # end = self._source_pad.astronaut_end
+        # distance = start.distance_to(end)
+        # money = distance * 10
         self._trip_money = trip_money
 
     def update(self, *args, **kwargs) -> None:
@@ -268,7 +283,10 @@ class Astronaut(pygame.sprite.Sprite):
         first_frame = Astronaut._NB_WAITING_IMAGES
         for frame in range(first_frame, first_frame + Astronaut._NB_WAVING_IMAGES):
             waving_frames.append((create_surface(frame), create_mask(frame)))
-        waving_frames.extend(waving_frames[1:-1][::-1])
+        added_frames = waiting_frames[-3:]
+        waving_frames.extend(added_frames * 2)
+        waving_frames.extend(waving_frames[:2][::-1])
+
 
         # astronaute qui se déplace en sautant (les _NB_JUMPING_IMAGES prochaines images)
         jumping_left_frames = []

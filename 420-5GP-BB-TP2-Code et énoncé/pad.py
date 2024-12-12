@@ -2,6 +2,7 @@ import pygame
 
 from game_settings import GameSettings
 
+STOCKED_IMAGES = {}
 
 class Pad(pygame.sprite.Sprite):
     """ Plateforme. """
@@ -13,17 +14,12 @@ class Pad(pygame.sprite.Sprite):
 
     def __init__(self, number: int, filename: str, pos: tuple, astronaut_start_x: int, astronaut_end_x: int) -> None:
         """
-        Initialise une instance de plateforme.
-        :param number: le numéro de la plateforme
-        :param filename: le nom du fichier graphique à utiliser
-        :param pos: la position (x, y) de la plateforme à l'écran
-        :param astronaut_start_x: la distance horizontale à partir du bord où apparaissent les astronautes
-        :param astronaut_end_x: la distance horizontale à partir du bord où disparaissent les astronautes
+        Initialize an instance of the platform.
         """
         super(Pad, self).__init__()
 
         self.number = number
-        self.image = pygame.image.load(filename).convert_alpha()
+        self.image = self.load_image(filename)
         self.mask = pygame.mask.from_surface(self.image)
 
         font = GameSettings().pad_font
@@ -31,13 +27,16 @@ class Pad(pygame.sprite.Sprite):
         text_width, text_height = self._label_text.get_size()
 
         background_height = text_height + 4
-        background_width = text_width + background_height  # + hauteur, pour les coins arrondis
+        background_width = text_width + background_height  # + hauteur pour les coins arrondis
         self._label_background = Pad._build_label(background_width, background_height)
 
-        self._label_text_offset = ((self.image.get_width() - text_width) / 2 + 1, 3)
-        self._label_background_offset = ((self.image.get_width() - background_width) / 2, 2)
+        surface_width, min_x, max_x = self.calculate_surface_bounds()
 
-        self.image.blit(self._label_background, self._label_background_offset)#, special_flags = pygame.BLEND_RGBA_ADD)
+        # Le milieu est maintenant basé sur l'espace d'atterissage, après on ajoute le min_x pour ignorer le vide à gauche
+        self._label_text_offset = ((min_x + (surface_width - text_width) / 2), 3)
+        self._label_background_offset = ((min_x + (surface_width - background_width) / 2), 2)
+
+        self.image.blit(self._label_background, self._label_background_offset)
         self.image.blit(self._label_text, self._label_text_offset)
 
         self.rect = self.image.get_rect()
@@ -52,6 +51,17 @@ class Pad(pygame.sprite.Sprite):
 
     def update(self, *args, **kwargs) -> None:
         pass
+
+    # Point M2: image.load() charge une image, la retourne mais laisse l'objet résider dans la RAM
+    # Si je load la même image encore une fois, ça va encore, créer un résidu dans la RAM
+    @staticmethod
+    def load_image(filename: str) -> pygame.Surface:
+        """
+        Charge une image
+        """
+        if filename not in STOCKED_IMAGES:
+            STOCKED_IMAGES[filename] = pygame.image.load(filename).convert_alpha()
+        return STOCKED_IMAGES[filename]
 
     @staticmethod
     def _build_label(width: int, height: int) -> pygame.Surface:
@@ -77,3 +87,44 @@ class Pad(pygame.sprite.Sprite):
         surface.unlock()
 
         return surface
+
+    def calculate_surface_bounds(self):
+        """
+        Calcule l'espace d'atterissage
+        Returns:
+        effective_width (int): La largeur de l'espace d'atterissage. On l'a en calculant la distance entre min_x et max_x
+        min_x (int): La coordonnée x du premier pixel non transparent
+        max_x (int): La coordonnée x du dernier pixel non transparent
+        """
+        surface_height = self.image.get_height()
+        surface_width = self.image.get_width()
+
+        # On mesure la longueur du 5% supérieur. (top c'est pour avoir au moins un pixel)
+        top_region_height = max(1, int(surface_height * 0.05))
+
+        # On coupe et garde le 5% supérieur
+        top_region = self.image.subsurface((0, 0, surface_width, top_region_height))
+
+        # Crée un mask de la partie haut car on peut pas voir les pixels blancs dans les subsurfaces
+        mask = pygame.mask.from_surface(top_region)
+
+        # Retourne les blocs non transparent en rectangles
+        bounding_rects = mask.get_bounding_rects()
+
+        # Si aucun pixel transparent
+        if not bounding_rects:
+            return 0, 0, 0
+
+        min_x = surface_width
+        max_x = 0
+
+        # Regarde le pixel plus à gauche et plus à droite non transparent. C'est une boucle, mais dans notre cas, y a seulement un rect
+        for rect in bounding_rects:
+            min_x = min(min_x, rect.x)
+            max_x = max(max_x, rect.x + rect.width)
+
+        effective_width = max_x - min_x
+
+        return effective_width, min_x, max_x
+
+

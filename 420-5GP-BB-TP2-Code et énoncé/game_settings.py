@@ -60,4 +60,7 @@ FILES = {
     "pad_4_pls_sound" : "voices/gary_pad_4_please_01.mp3",
     "pad_5_pls_sound" : "voices/gary_pad_5_please_01.mp3",
     "gary_hey_sound" : "voices/gary_hey_01.mp3",
+
+    "taxis_splash" : "img/taxis.png",
+    "pump" : "img/pump.png"
 }

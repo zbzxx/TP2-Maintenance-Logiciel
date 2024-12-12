@@ -31,8 +31,12 @@ class SceneManager:
     def set_scene(self, name: str) -> None:
         self._current_scene = self._scenes.get(name, self._current_scene)
 
-    def change_scene(self, name: str, fade_duration: int = 0) -> None:
+    def change_scene(self, name: str, fade_duration: int = 0, resources: dict = None) -> None:
         self._next_scene = self._scenes.get(name, self._current_scene)
+        if self._next_scene and resources:
+            from level_scene import LevelScene
+            if isinstance(self._next_scene, LevelScene):
+                self._next_scene.initialize_with_resources(resources)
         self._fade = Fade(self._current_scene, self._next_scene)
         self._fade.start(fade_duration)
         self._transitioning = True
