@@ -162,15 +162,19 @@ class Taxi(pygame.sprite.Sprite):
         :return: True si le taxi frappe l'astronaute, False sinon
         """
         if self._pad_landed_on or astronaut.is_onboard():
-            if astronaut._state == AstronautState.REACHED_DESTINATION:
-                1/0
+
             return False
 
+        if astronaut._state == AstronautState.REACHED_DESTINATION:
+            1 / 0
 
         if self.rect.colliderect(astronaut.rect):
             self._select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
                self._select_image( False )
+               if astronaut._state == AstronautState.REACHED_DESTINATION:
+                   # todo: testing
+                   1 / 0
                return True
         self._select_image( False )
         return False
