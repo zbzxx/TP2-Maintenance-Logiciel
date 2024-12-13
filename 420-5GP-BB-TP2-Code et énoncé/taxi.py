@@ -100,7 +100,7 @@ class Taxi(pygame.sprite.Sprite):
     def crash_on_anything(self, obs: Obstacle| Pad| Pump):
         """
               Vérifie si le taxi est en situation de crash contre un obstacle.
-              :param obstacle: obstacle avec lequel vérifier
+              :param obs: obstacle avec lequel vérifier
               :return: True si le taxi est en contact avec l'obstacle, False sinon
               """
 
@@ -258,7 +258,7 @@ class Taxi(pygame.sprite.Sprite):
             return False
         print("refueling")
         if self.fuel_remaining<1.0:
-            self.fuel_remaining+=1.0
+            self.fuel_remaining+=0.1
         return True
 
     def reset(self) -> None:
@@ -443,7 +443,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._pad_landed_on = None
         self._taking_off = False
-        self.fuel_remaining = 0.01
+        self.fuel_remaining = 1.0
         self._astronaut = None
         self._hud.set_trip_money(0.0)
 

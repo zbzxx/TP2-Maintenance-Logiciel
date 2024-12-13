@@ -86,7 +86,8 @@ class Astronaut(pygame.sprite.Sprite):
         try:
             end = self.target_pad.astronaut_start
         except:
-            end = [0,0]
+            # en cas de go up
+            end = [640,720]
         print(source)
         print(end)
         distance = source.distance_to(end)
