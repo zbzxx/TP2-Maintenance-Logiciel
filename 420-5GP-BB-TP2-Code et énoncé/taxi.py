@@ -1,7 +1,6 @@
 from enum import Enum, auto
 
 import pygame
-from orca.braille import killFlash
 
 from game_settings import FILES
 from astronaut import Astronaut, AstronautState
