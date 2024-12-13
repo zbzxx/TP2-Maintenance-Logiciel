@@ -82,8 +82,11 @@ class Astronaut(pygame.sprite.Sprite):
         self._last_frame_time = time.time()
 
         source = self._source_pad.astronaut_start
-        end = self.target_pad.astronaut_start
-
+        end = 0
+        try:
+            end = self.target_pad.astronaut_start
+        except:
+            end = [0,0]
         print(source)
         print(end)
         distance = source.distance_to(end)

@@ -62,7 +62,7 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
-        self._astronauts_pad_positions = [[self._pads[3], self._pads[0]],
+        self._astronauts_pad_positions = [[self._pads[3], Pad.UP],
                                           [self._pads[2], self._pads[4]],
                                           [self._pads[0], self._pads[1]],
                                           [self._pads[4], self._pads[2]],
@@ -132,7 +132,7 @@ class LevelScene(Scene):
                         self._taxi.unboard_astronaut()
                         self._taxi = None
                         self._fade_out_start_time = pygame.time.get_ticks()
-                        SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
+                        SceneManager().change_scene(f"level{self.level + 1}_load", LevelScene._FADE_OUT_DURATION)
                         return
             elif self._astronaut.has_reached_destination():
                 if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
