@@ -74,7 +74,7 @@ class Taxi(pygame.sprite.Sprite):
         self._crash_sound = pygame.mixer.Sound(FILES['crash_sound'])
 
         self._surfaces, self._masks, self._maskReactor = Taxi._load_and_build_surfaces()
-        self.fuel_remaining = 5.0
+        self.fuel_remaining = 1.0
 
         self._reinitialize()
 
@@ -115,15 +115,20 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_vector2 = pygame.math.Vector2(0.0 , 0.0)
-                self._acceleration_vector2 = pygame.math.Vector2( 0.0
-
-                , Taxi._CRASH_ACCELERATION)
+                self._acceleration_vector2 = pygame.math.Vector2( 0.0, Taxi._CRASH_ACCELERATION)
                 return True
 
         return False
 
     def draw(self, surface: pygame.Surface) -> None:
         """ Dessine le taxi sur la surface fournie comme argument. """
+
+        fuel_percentage = int(self.fuel_remaining * 100)  # Convert to percentage
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Fuel: {fuel_percentage}%", True, (0,0,0))
+        text_rect = text.get_rect(center=(1280 // 2, 720 - 50))
+        surface.blit(text, text_rect)
+
         surface.blit(self.image, self.rect)
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -252,8 +257,8 @@ class Taxi(pygame.sprite.Sprite):
         if not self.rect.colliderect(pump.rect):
             return False
         print("refueling")
-        if self.fuel_remaining<=5.0:
-            self.fuel_remaining+=0.1
+        if self.fuel_remaining<1.0:
+            self.fuel_remaining+=1.0
         return True
 
     def reset(self) -> None:
@@ -307,19 +312,24 @@ class Taxi(pygame.sprite.Sprite):
 
     # draine l'escence du taxi quand il utilise ses reacteurs
     def drain_fuel(self) -> None:
-        if self.fuel_remaining < 0 & self._flags & Taxi._FLAG_DESTROYED != Taxi._FLAG_DESTROYED :
+        if self.fuel_remaining < 0 and  self._flags  != Taxi._FLAG_DESTROYED :
             if self._astronaut:
                 self._astronaut.set_trip_money(0.0)
             self._flags = self._FLAG_DESTROYED
-            self.fuel_remaining = 0.0
-            # print("no fuel")
-            self._accelerationk_y = Taxi._CRASH_ACCELERATION
+            self._crash_sound.play()
+            self._velocity_vector2 = pygame.math.Vector2(0.0, 0.0)
+            print("no fuel")
+            self._acceleration_vector2 = pygame.math.Vector2(0.0, Taxi._CRASH_ACCELERATION)
         else:
-            if Taxi._FLAG_BOTTOM_REACTOR:
+            if self._flags == Taxi._FLAG_BOTTOM_REACTOR:
+                print("bottom")
                 self.fuel_remaining-= self._BOTTOM_REACTOR_POWER
-            if Taxi._FLAG_TOP_REACTOR:
+            if self._flags == Taxi._FLAG_TOP_REACTOR:
+                print("top")
+
                 self.fuel_remaining-= self._TOP_REACTOR_POWER
-            if Taxi._FLAG_REAR_REACTOR:
+            if self._flags == Taxi._FLAG_REAR_REACTOR:
+                print("rear")
                 self.fuel_remaining-= self._REAR_REACTOR_POWER
         # print(self.fuel_remaining)
 
@@ -433,7 +443,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._pad_landed_on = None
         self._taking_off = False
-        self.fuel_remaining = 5.0
+        self.fuel_remaining = 0.01
         self._astronaut = None
         self._hud.set_trip_money(0.0)
 
