@@ -52,7 +52,7 @@ class Taxi(pygame.sprite.Sprite):
     _MAX_ACCELERATION_Y_DOWN = 0.05
 
     _MAX_VELOCITY_SMOOTH_LANDING = 0.50  # vitesse maximale permise pour un atterrissage en douceur
-    _MAX_VELOCITY_ROUGH_LANDING = 10.0
+    _MAX_VELOCITY_ROUGH_LANDING = 0.7
     _CRASH_ACCELERATION = 0.10
 
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
@@ -227,7 +227,7 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags = Taxi._FLAG_SHOCK
             else:
                 self._SOFT_LANDING_SOUND.play()
-
+            self._flags = Taxi._FLAG_GEAR_OUT
             # self._velocity_x = 15.0
             # self._velocity_y = 0.0
 
@@ -525,7 +525,7 @@ class Taxi(pygame.sprite.Sprite):
                 self.mask = self._maskReactor[ImgSelector.GEAR_OUT][facing]
             return
 
-        if self._flags & Taxi._FLAG_SHOCK:
+        if self._flags & Taxi._FLAG_SHOCK &Taxi._FLAG_GEAR_OUT:
             self.image = self._surfaces[ImgSelector.GEAR_SHOCKS][facing]
             self.mask = self._masks[ImgSelector.GEAR_SHOCKS][facing]
             return
