@@ -76,12 +76,12 @@ class LevelScene(Scene):
                                           [self._pads[1], self._pads[3]],
                                           [self._pads[0], Pad.UP]]
 
-        #Propriétée pour attendre lors du spawn
+        # Propriétée pour attendre lors du spawn
         self._taxi_spawning = False
-        self._taxi_spawning_time = 2000 # millisecondes
+        self._taxi_spawning_time = 2000  # millisecondes
         self._taxi_spawned_time = pygame.time.get_ticks()
 
-        #Premier jingle lors de l'apaprition
+        # Premier jingle lors de l'apaprition
         self._first_jingle_showed = False
 
         # Propriétées pour le texte
@@ -91,6 +91,28 @@ class LevelScene(Scene):
         self._text_showed = False
         self._lock = threading.Lock()
         self._font = pygame.font.Font("fonts/boombox2.ttf", 20)
+
+    def initialize_with_resources(self, resources: dict) -> None:
+        self._surface = resources['surface']
+        self._music = resources['music']
+        self._taxi = resources['taxi']
+        self._gate = resources['gate']
+        self._obstacle_sprites = resources['obstacle_sprites']
+        self._pump_sprites = resources['pump_sprites']
+        self._pad_sprites = resources['pad_sprites']
+        self._pads = resources['pads']
+        self._pumps = resources['pumps']
+        self._obstacles = resources['obstacles']
+
+        self._reinitialize()
+        self._hud.visible = True
+
+        self._astronauts_pad_positions = [[self._pads[3], Pad.UP],
+                                          [self._pads[2], self._pads[4]],
+                                          [self._pads[0], self._pads[1]],
+                                          [self._pads[4], self._pads[2]],
+                                          [self._pads[1], self._pads[3]],
+                                          [self._pads[0], Pad.UP]]
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
@@ -112,18 +134,19 @@ class LevelScene(Scene):
         Met à jour le niveau de jeu. Cette méthode est appelée à chaque itération de la boucle de jeu.
         :param delta_time: Temps écoulé (en secondes) depuis la dernière trame affichée
         """
+
         if not self._first_jingle_showed:
             self._first_jingle_showed = True
             self.respawn_taxi()
+
+        if not self._music_started:
+            self._music.play(-1)
+            self._music_started = True
 
         if self._taxi_spawning:
             if self._taxi_spawned_time + self._taxi_spawning_time < pygame.time.get_ticks():
                 self._taxi_spawning = False
         else:
-            if not self._music_started:
-                self._music.play(-1)
-                self._music_started = True
-
             if self._fade_out_start_time:
                 elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
                 volume = max(0.0, 1.0 - (elapsed_time / LevelScene._FADE_OUT_DURATION))
@@ -149,11 +172,11 @@ class LevelScene(Scene):
                             self._taxi = None
                             self._fade_out_start_time = pygame.time.get_ticks()
                             if SceneManager().scene_exists(f"level{self._level + 1}"):
-                                SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
+                                SceneManager().change_scene(f"level{self._level + 1}_load",
+                                                            LevelScene._FADE_OUT_DURATION)
                             else:
                                 self.display_game_over_message()
                             return
-
                 elif self._astronaut.has_reached_destination():
                     if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
                         self._nb_taxied_astronauts += 1
@@ -236,6 +259,7 @@ class LevelScene(Scene):
           #                  Astronaut(self._pads[0], Pad.UP, 20.00)]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
+
 
     def astronaut_spawner(self, astronaut_to_spawn) -> Astronaut :
         return Astronaut(self._astronauts_pad_positions[astronaut_to_spawn][0],
@@ -332,10 +356,15 @@ class LevelScene(Scene):
             self._text_thread.start()
 
     def display_game_over_message(self):
+        """Displays the Game Over message."""
         # Screen dimensions
         screen_width, screen_height = 800, 600
         screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption("GAME OVER")
+
+        pygame.mixer.music.set_volume(0)
+        for i in range(pygame.mixer.get_num_channels()):
+            pygame.mixer.Channel(i).stop()
 
         # Colors
         black = (0, 0, 0)
@@ -366,6 +395,7 @@ class LevelScene(Scene):
         # Update the display
         pygame.display.flip()
 
+        # Wait for the user to press ESC to quit
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -381,4 +411,5 @@ class LevelScene(Scene):
         self._taxi_spawning = True
         pygame.mixer.music.load(FILES["spawn_jingle"])
         pygame.mixer.music.play(loops=0)
+
 

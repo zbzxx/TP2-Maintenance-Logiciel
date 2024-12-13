@@ -2,7 +2,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
-from game_settings import FILES
+from game_settings import FILES, GameSettings
 
 
 class SplashScene(Scene):
@@ -12,6 +12,7 @@ class SplashScene(Scene):
 
     def __init__(self) -> None:
         super().__init__()
+        self._settings = GameSettings()
         self._surface = pygame.image.load(FILES['splash']).convert_alpha()
         self._music = pygame.mixer.Sound(FILES['music_splash'])
         self._music.play(loops=-1, fade_ms=1000)
@@ -32,10 +33,18 @@ class SplashScene(Scene):
         return
 
     def handle_event(self, event: pygame.event.Event) -> None:
+        if self._settings.JOYSTICK:
+            if event.type == pygame.JOYBUTTONDOWN and self._fade_out_start_time is None:
+                if event.button == 9 or event.button == 1:
+                    self.start_level()
+
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_RETURN, pygame.K_SPACE) and self._fade_out_start_time is None:
-                self._fade_out_start_time = pygame.time.get_ticks()
-                SceneManager().change_scene("level1_load", SplashScene._FADE_OUT_DURATION)
+                self.start_level()
+
+    def start_level(self) -> None:
+        self._fade_out_start_time = pygame.time.get_ticks()
+        SceneManager().change_scene("level1_load", SplashScene._FADE_OUT_DURATION)
 
     def update(self, delta_time: float) -> None:
         if self._fade_out_start_time:

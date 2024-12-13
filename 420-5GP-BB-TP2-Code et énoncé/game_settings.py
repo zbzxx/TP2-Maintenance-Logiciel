@@ -10,6 +10,8 @@ class GameSettings:
 
     NB_PLAYER_LIVES = 5
 
+    JOYSTICK = []
+
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -21,7 +23,6 @@ class GameSettings:
         if not hasattr(self, '_initialized'):
             self.screen = None
             self.pad_font = pygame.font.Font("fonts/boombox2.ttf", 11)
-
             self._initialized = True
 
 
@@ -59,5 +60,12 @@ FILES = {
     "pad_4_pls_sound" : "voices/gary_pad_4_please_01.mp3",
     "pad_5_pls_sound" : "voices/gary_pad_5_please_01.mp3",
     "gary_hey_sound" : "voices/gary_hey_01.mp3",
-    "spawn_jingle" : "voices/taxi_spawn_jingle.mp3"
+    "spawn_jingle" : "voices/taxi_spawn_jingle.mp3",
+
+    "taxis_splash" : "img/taxis.png",
+    "pump" : "img/pump.png",
+    "level1" : "level1.cfg",
+
+    "soft_landing_sound" : "snd/smooth_landing.wav",
+    "rough_landing_sound" : "snd/rough_landing.mp3"
 }

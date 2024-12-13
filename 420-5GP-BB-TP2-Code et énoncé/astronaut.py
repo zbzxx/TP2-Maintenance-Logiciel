@@ -3,6 +3,9 @@ import random
 import time
 
 from enum import Enum, auto
+
+
+
 from pad import Pad
 from game_settings import FILES
 
@@ -78,6 +81,20 @@ class Astronaut(pygame.sprite.Sprite):
         self._current_frame = 0
         self._last_frame_time = time.time()
 
+        source = self._source_pad.astronaut_start
+        end = 0
+        try:
+            end = self.target_pad.astronaut_start
+        except:
+            # en cas de go up
+            end = [640,720]
+        print(source)
+        print(end)
+        distance = source.distance_to(end)
+        print(distance)
+        # distance = 0
+        self.set_trip_money(distance)
+
     @property
     def source_pad(self) -> Pad:
         return self._source_pad
@@ -149,6 +166,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._pos_x = float(self.rect.x)
 
     def set_trip_money(self, trip_money: float) -> None:
+
         self._trip_money = trip_money
 
     def update(self, *args, **kwargs) -> None:
