@@ -107,7 +107,7 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
-        self._astronauts_pad_positions = [[self._pads[3], Pad.UP],
+        self._astronauts_pad_positions = [[self._pads[3], self._pads[0]],
                                           [self._pads[2], self._pads[4]],
                                           [self._pads[0], self._pads[1]],
                                           [self._pads[4], self._pads[2]],
@@ -138,10 +138,6 @@ class LevelScene(Scene):
         if not self._first_jingle_showed:
             self._first_jingle_showed = True
             self.respawn_taxi()
-
-        if not self._music_started:
-            self._music.play(-1)
-            self._music_started = True
 
         if self._taxi_spawning:
             if self._taxi_spawned_time + self._taxi_spawning_time < pygame.time.get_ticks():
