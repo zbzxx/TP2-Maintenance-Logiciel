@@ -30,6 +30,8 @@ class Taxi(pygame.sprite.Sprite):
     _SOFT_LANDING_SOUND = (FILES['soft_landing_sound'])
     _ROUGH_LANDING_SOUND = (FILES['rough_landing_sound'])
 
+    _HIT_ASTRONAUT = (FILES['gary_hey_sound'])
+
     _TAXIS_FILENAME = FILES['taxis_splash']
     _NB_TAXI_IMAGES = 6
 
@@ -78,6 +80,7 @@ class Taxi(pygame.sprite.Sprite):
         self._crash_sound = pygame.mixer.Sound(FILES['crash_sound'])
         self._SOFT_LANDING_SOUND = pygame.mixer.Sound(FILES['soft_landing_sound'])
         self._ROUGH_LANDING_SOUND = pygame.mixer.Sound(FILES['rough_landing_sound'])
+        self._HIT_ASTRONAUT = pygame.mixer.Sound(FILES['gary_hey_sound'])
 
         self._surfaces, self._masks, self._maskReactor = Taxi._load_and_build_surfaces()
         self.fuel_remaining = 1.0
@@ -180,8 +183,8 @@ class Taxi(pygame.sprite.Sprite):
 
 
         if self.rect.colliderect(astronaut.rect):
-
-            self.select_image(True)
+            self._HIT_ASTRONAUT.play()
+            self._select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
                self.select_image(False)
                # if astronaut._state == AstronautState.REACHED_DESTINATION:
