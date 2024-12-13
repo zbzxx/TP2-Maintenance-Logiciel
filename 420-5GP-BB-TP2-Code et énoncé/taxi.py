@@ -184,7 +184,7 @@ class Taxi(pygame.sprite.Sprite):
 
         if self.rect.colliderect(astronaut.rect):
             self._HIT_ASTRONAUT.play()
-            self._select_image(True)
+            self.select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
                self.select_image(False)
                # if astronaut._state == AstronautState.REACHED_DESTINATION:
