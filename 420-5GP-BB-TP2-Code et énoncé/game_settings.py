@@ -63,5 +63,8 @@ FILES = {
 
     "taxis_splash" : "img/taxis.png",
     "pump" : "img/pump.png",
-    "level1" : "level1.cfg"
+    "level1" : "level1.cfg",
+
+    "soft_landing_sound" : "snd/smooth_landing.wav",
+    "rough_landing_sound" : "snd/rough_landing.mp3"
 }

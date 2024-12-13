@@ -27,6 +27,8 @@ class ImgSelector(Enum):
 
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
+    _SOFT_LANDING_SOUND = (FILES['soft_landing_sound'])
+    _ROUGH_LANDING_SOUND = (FILES['rough_landing_sound'])
 
     _TAXIS_FILENAME = FILES['taxis_splash']
     _NB_TAXI_IMAGES = 6
@@ -37,6 +39,7 @@ class Taxi(pygame.sprite.Sprite):
     _FLAG_REAR_REACTOR = 1 << 3  # indique si le réacteur arrière est allumé
     _FLAG_GEAR_OUT = 1 << 4  # indique si le train d'atterrissage est sorti
     _FLAG_DESTROYED = 1 << 5  # indique si le taxi est détruit
+    _FLAG_SHOCK = 1 << 6
 
     _REACTOR_SOUND_VOLUME =1
 
@@ -49,6 +52,7 @@ class Taxi(pygame.sprite.Sprite):
     _MAX_ACCELERATION_Y_DOWN = 0.05
 
     _MAX_VELOCITY_SMOOTH_LANDING = 0.50  # vitesse maximale permise pour un atterrissage en douceur
+    _MAX_VELOCITY_ROUGH_LANDING = 10.0
     _CRASH_ACCELERATION = 0.10
 
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
@@ -72,6 +76,8 @@ class Taxi(pygame.sprite.Sprite):
         self._reactor_sound.play(-1)
 
         self._crash_sound = pygame.mixer.Sound(FILES['crash_sound'])
+        self._SOFT_LANDING_SOUND = pygame.mixer.Sound(FILES['soft_landing_sound'])
+        self._ROUGH_LANDING_SOUND = pygame.mixer.Sound(FILES['rough_landing_sound'])
 
         self._surfaces, self._masks, self._maskReactor = Taxi._load_and_build_surfaces()
         self.fuel_remaining = 1.0
@@ -174,6 +180,7 @@ class Taxi(pygame.sprite.Sprite):
 
 
         if self.rect.colliderect(astronaut.rect):
+
             self._select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
                self._select_image( False )
@@ -201,7 +208,7 @@ class Taxi(pygame.sprite.Sprite):
         if not gear_out:
             return False
 
-        if self._velocity_vector2.y > Taxi._MAX_VELOCITY_SMOOTH_LANDING or self._velocity_vector2.y < 0.0:
+        if self._velocity_vector2.y > Taxi._MAX_VELOCITY_ROUGH_LANDING or self._velocity_vector2.y < 0.0:
             #self._acceleration_y < 0.0:
             return False
 
@@ -213,28 +220,34 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if pygame.sprite.collide_mask(self, pad):
-            #TODO : fix le sliding, ca brise le hitbox ou la position logique du taxi
-            #self._velocity_vector2 = pygame.math.Vector2(15.0, 0.0)
+            if abs(self._velocity_vector2.y) > Taxi._MAX_VELOCITY_SMOOTH_LANDING:
+                print(f"Vitesse verticale : {self._velocity_vector2.y}")
+                self._ROUGH_LANDING_SOUND.play()
+                Taxi._FLAG_SHOCK = True
+                self._flags = Taxi._FLAG_SHOCK
+            else:
+                self._SOFT_LANDING_SOUND.play()
+
+            # self._velocity_x = 15.0
+            # self._velocity_y = 0.0
 
             # Atterrissage réussi
             self.rect.bottom = pad.rect.top + 4
             self._pos_vector2.y = float(self.rect.y)
             self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
 
-            # Gérer l'effet de glisse
-            #max_glide_distance = self.rect.width /2
-            #glide_distance = 0.0
-            #friction = 0.05
-
-            #while abs(self._velocity_vector2.x) > 0 and glide_distance < max_glide_distance:
-            #    print(f"Position avant le glissement: {self.rect.x}")
-             #   pygame.time.delay(20)
-             #   self.rect.x += self._velocity_vector2.x
-             #   glide_distance += abs(self._velocity_vector2.x)
-             #   self._velocity_vector2.x -= friction * (1 if self._velocity_vector2.x > 0 else -1)
-             #   print(f"Glisse : vitesse_x={self._velocity_vector2.x}, distance={glide_distance}")
-
-            #print(f"Position finale après glissement: {self.rect.x}")
+            # # Gérer l'effet de glisse
+            # max_glide_distance = self.rect.width /2
+            # glide_distance = 0.0
+            # friction = 0.05
+            #
+            # while abs(self._velocity_x) > 0 and glide_distance < max_glide_distance:
+            #     print(f"Position avant le glissement: {self.rect.x}")
+            #     pygame.time.delay(20)
+            #     self.rect.x += self._velocity_x
+            #     glide_distance += abs(self._velocity_x)
+            #     self._velocity_x -= friction * (1 if self._velocity_x > 0 else -1)
+            #     print(f"Glisse : vitesse_x={self._velocity_x}, distance={glide_distance}")
 
             self._velocity_vector2 = pygame.math.Vector2(0.0, 0.0)
             self._acceleration_vector2 = pygame.math.Vector2(0.0, 0.0)
@@ -451,6 +464,8 @@ class Taxi(pygame.sprite.Sprite):
         """ Sélectionne l'image et le masque à utiliser pour l'affichage du taxi en fonction de son état. """
         facing = self._flags & Taxi._FLAG_LEFT
 
+
+
         if self._flags & Taxi._FLAG_DESTROYED:
             self.image = self._surfaces[ImgSelector.DESTROYED][facing]
             self.mask = self._masks[ImgSelector.DESTROYED][facing]
@@ -510,12 +525,19 @@ class Taxi(pygame.sprite.Sprite):
                 self.mask = self._maskReactor[ImgSelector.GEAR_OUT][facing]
             return
 
+        if self._flags & Taxi._FLAG_SHOCK:
+            self.image = self._surfaces[ImgSelector.GEAR_SHOCKS][facing]
+            self.mask = self._masks[ImgSelector.GEAR_SHOCKS][facing]
+            return
+
         if self._flags & Taxi._FLAG_DESTROYED:
             self.image = self._surfaces[ImgSelector.DESTROYED][facing]
             self.mask = self._masks[ImgSelector.DESTROYED][facing]
             if reactorCheck:
                 self.mask = self._maskReactor[ImgSelector.DESTROYED][facing]
             return
+
+
 
         self.image = self._surfaces[ImgSelector.IDLE][facing]
         self.mask = self._masks[ImgSelector.IDLE][facing]
