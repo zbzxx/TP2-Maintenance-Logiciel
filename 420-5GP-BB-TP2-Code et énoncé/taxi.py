@@ -275,6 +275,8 @@ class Taxi(pygame.sprite.Sprite):
         print("refueling")
         if self.fuel_remaining<1.0:
             self.fuel_remaining+=0.1
+            if self.fuel_remaining >= 1:
+                self.fuel_remaining = 1.0
         return True
 
     def reset(self) -> None:
