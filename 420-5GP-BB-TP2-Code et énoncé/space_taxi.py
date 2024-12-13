@@ -18,6 +18,8 @@ import os
 from math import trunc
 from threading import Thread
 
+import game_settings
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import sys
@@ -35,7 +37,7 @@ def main() -> None:
     pygame.init()
     pygame.mixer.init()
 
-    pygame_icon = pygame.image.load('img/icone_space_taxi.png')
+    pygame_icon = pygame.image.load(game_settings.FILES["icone"])
     pygame.display.set_icon(pygame_icon)
 
     settings = GameSettings()

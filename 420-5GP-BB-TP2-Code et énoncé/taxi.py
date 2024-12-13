@@ -127,7 +127,7 @@ class Taxi(pygame.sprite.Sprite):
 
                     self._flags ^= Taxi._FLAG_GEAR_OUT  # flip le bit pour refléter le nouvel état
 
-                    self._select_image( False )
+                    self.select_image(False)
 
     def has_exited(self) -> bool:
         """
@@ -147,11 +147,11 @@ class Taxi(pygame.sprite.Sprite):
 
 
         if self.rect.colliderect(astronaut.rect):
-            self._select_image(True)
+            self.select_image(True)
             if pygame.sprite.collide_mask(self, astronaut):
-               self._select_image( False )
+               self.select_image(False)
                return True
-        self._select_image( False )
+        self.select_image(False)
         return False
 
     def is_destroyed(self) -> bool:
@@ -249,7 +249,7 @@ class Taxi(pygame.sprite.Sprite):
             self._reactor_sound.set_volume(0)
 
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
-        self._select_image(False)
+        self.select_image(False)
 
     def _handle_keys(self) -> None:
         """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
@@ -295,7 +295,7 @@ class Taxi(pygame.sprite.Sprite):
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """
         self._flags = 0
-        self._select_image(False)
+        self.select_image(False)
 
         self.rect = self.image.get_rect()
         self.rect.x = self._initial_pos[0] - self.rect.width / 2
@@ -315,7 +315,7 @@ class Taxi(pygame.sprite.Sprite):
         self._astronaut = None
         self._hud.set_trip_money(0.0)
 
-    def _select_image(self, reactorCheck) -> None:
+    def select_image(self, reactorCheck) -> None:
         """ Sélectionne l'image et le masque à utiliser pour l'affichage du taxi en fonction de son état. """
         facing = self._flags & Taxi._FLAG_LEFT
 
@@ -526,3 +526,13 @@ class Taxi(pygame.sprite.Sprite):
         masksReactor[ImgSelector.DESTROYED] = pygame.mask.from_surface(surface ), pygame.mask.from_surface(flipped )
 
         return surfaces, masks, masksReactor
+
+    @property
+    def FLAG_LEFT(self):
+        return self._FLAG_LEFT
+
+    def turn_right(self):
+        self._flags &= ~Taxi._FLAG_LEFT
+
+    def turn_left(self):
+        self._flags |= Taxi._FLAG_LEFT

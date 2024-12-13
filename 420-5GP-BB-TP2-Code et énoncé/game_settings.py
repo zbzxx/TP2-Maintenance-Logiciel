@@ -48,7 +48,7 @@ FILES = {
     "music_splash" : "snd/371516__mrthenoronha__space-game-theme-loop.wav",
     "reactor_sound" : "snd/170278__knova__jetpack-low.wav",
     "crash_sound" : "snd/237375__squareal__car-crash.wav",
-
+    "icone" : "img/space_taxi_icon.ico",
     "hey_taxi_sound_1" : "voices/gary_hey_taxi_01.mp3",
     "hey_taxi_sound_2" :"voices/gary_hey_taxi_02.mp3",
     "hey_taxi_sound_3" :"voices/gary_hey_taxi_03.mp3",
@@ -59,4 +59,5 @@ FILES = {
     "pad_4_pls_sound" : "voices/gary_pad_4_please_01.mp3",
     "pad_5_pls_sound" : "voices/gary_pad_5_please_01.mp3",
     "gary_hey_sound" : "voices/gary_hey_01.mp3",
+    "spawn_jingle" : "voices/taxi_spawn_jingle.mp3"
 }

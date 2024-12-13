@@ -25,6 +25,9 @@ class SceneManager:
 
             self._initialized = True
 
+    def scene_exists(self, name) -> bool:
+        return name in self._scenes
+
     def add_scene(self, name: str, scene: Scene) -> None:
         self._scenes[name] = scene
 

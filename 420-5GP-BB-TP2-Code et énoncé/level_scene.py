@@ -76,6 +76,14 @@ class LevelScene(Scene):
                                           [self._pads[1], self._pads[3]],
                                           [self._pads[0], Pad.UP]]
 
+        #Propriétée pour attendre lors du spawn
+        self._taxi_spawning = False
+        self._taxi_spawning_time = 2000 # millisecondes
+        self._taxi_spawned_time = pygame.time.get_ticks()
+
+        #Premier jingle lors de l'apaprition
+        self._first_jingle_showed = False
+
         # Propriétées pour le texte
         self._text_opacity = 0
         self._text_thread = None
@@ -90,6 +98,7 @@ class LevelScene(Scene):
             if event.key == pygame.K_SPACE and self._taxi.is_destroyed():
                 self._taxi.reset()
                 self._retry_current_astronaut()
+                self.respawn_taxi()
                 return
 
         if self._taxi:
@@ -101,80 +110,92 @@ class LevelScene(Scene):
     def update(self, delta_time: float) -> None:
         """
         Met à jour le niveau de jeu. Cette méthode est appelée à chaque itération de la boucle de jeu.
-        :param delta_time: temps écoulé (en secondes) depuis la dernière trame affichée
+        :param delta_time: Temps écoulé (en secondes) depuis la dernière trame affichée
         """
-        if not self._music_started:
-            self._music.play(-1)
-            self._music_started = True
+        if not self._first_jingle_showed:
+            self._first_jingle_showed = True
+            self.respawn_taxi()
 
-        if self._fade_out_start_time:
-            elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
-            volume = max(0.0, 1.0 - (elapsed_time / LevelScene._FADE_OUT_DURATION))
-            self._music.set_volume(volume)
-            if volume == 0:
-                self._fade_out_start_time = None
-
-        if self._taxi is None:
-            return
-
-        if self._astronaut:
-            self._astronaut.update()
-            self._hud.set_trip_money(self._astronaut.get_trip_money())
-
-            if self._astronaut.is_onboard():
-                self._start_text_thread()
-                self._taxi.board_astronaut(self._astronaut)
-                if self._astronaut.target_pad is Pad.UP:
-                    if self._gate.is_closed():
-                        self._gate.open()
-                    elif self._taxi.has_exited():
-                        self._taxi.unboard_astronaut()
-                        self._taxi = None
-                        self._fade_out_start_time = pygame.time.get_ticks()
-                        SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
-                        return
-            elif self._astronaut.has_reached_destination():
-                if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
-                    self._nb_taxied_astronauts += 1
-                    self._astronaut = None
-                    self._last_taxied_astronaut_time = time.time()
-                    self._text_showed = False
-            elif self._taxi.hit_astronaut(self._astronaut):
-                self._retry_current_astronaut()
-                self._text_showed = False
-            elif self._taxi.pad_landed_on:
-                if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
-                    if self._astronaut.is_waiting_for_taxi():
-                        self._astronaut.jump(self._taxi.rect.x + self._taxi.door_location())
-            elif self._astronaut.is_jumping_on_starting_pad():
-                self._astronaut.wait()
+        if self._taxi_spawning:
+            if self._taxi_spawned_time + self._taxi_spawning_time < pygame.time.get_ticks():
+                self._taxi_spawning = False
         else:
-            if time.time() - self._last_taxied_astronaut_time >= LevelScene._TIME_BETWEEN_ASTRONAUTS:
-                self._astronaut = self.astronaut_spawner(self._nb_taxied_astronauts)
+            if not self._music_started:
+                self._music.play(-1)
+                self._music_started = True
 
-        self._taxi.update()
+            if self._fade_out_start_time:
+                elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
+                volume = max(0.0, 1.0 - (elapsed_time / LevelScene._FADE_OUT_DURATION))
+                self._music.set_volume(volume)
+                if volume == 0:
+                    self._fade_out_start_time = None
 
-        for pad in self._pads:
-            if self._taxi.land_on_pad(pad):
-                pass  # introduire les effets secondaires d'un atterrissage ici
-            elif self._taxi.crash_on_anything(pad):
+            if self._taxi is None:
+                return
+
+            if self._astronaut:
+                self._astronaut.update()
+                self._hud.set_trip_money(self._astronaut.get_trip_money())
+
+                if self._astronaut.is_onboard():
+                    self._start_text_thread()
+                    self._taxi.board_astronaut(self._astronaut)
+                    if self._astronaut.target_pad is Pad.UP:
+                        if self._gate.is_closed():
+                            self._gate.open()
+                        elif self._taxi.has_exited():
+                            self._taxi.unboard_astronaut()
+                            self._taxi = None
+                            self._fade_out_start_time = pygame.time.get_ticks()
+                            if SceneManager().scene_exists(f"level{self._level + 1}"):
+                                SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
+                            else:
+                                self.display_game_over_message()
+                            return
+
+                elif self._astronaut.has_reached_destination():
+                    if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
+                        self._nb_taxied_astronauts += 1
+                        self._astronaut = None
+                        self._last_taxied_astronaut_time = time.time()
+                        self._text_showed = False
+                elif self._taxi.hit_astronaut(self._astronaut):
+                    self._retry_current_astronaut()
+                    self._text_showed = False
+                elif self._taxi.pad_landed_on:
+                    if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
+                        if self._astronaut.is_waiting_for_taxi():
+                            self._astronaut.jump(self._taxi.rect.x + self._taxi.door_location())
+                elif self._astronaut.is_jumping_on_starting_pad():
+                    self._astronaut.wait()
+            else:
+                if time.time() - self._last_taxied_astronaut_time >= LevelScene._TIME_BETWEEN_ASTRONAUTS:
+                    self._astronaut = self.astronaut_spawner(self._nb_taxied_astronauts)
+
+            self._taxi.update()
+
+            for pad in self._pads:
+                if self._taxi.land_on_pad(pad):
+                    pass  # introduire les effets secondaires d'un atterrissage ici
+                elif self._taxi.crash_on_anything(pad):
+                    self._hud.loose_live()
+
+            for obstacle in self._obstacles:
+                if self._taxi.crash_on_anything(obstacle):
+                    self._hud.loose_live()
+
+            if self._gate.is_closed() and self._taxi.crash_on_anything(self._gate):
                 self._hud.loose_live()
 
-        for obstacle in self._obstacles:
-            if self._taxi.crash_on_anything(obstacle):
-                self._hud.loose_live()
+            for pump in self._pumps:
+                if self._taxi.crash_on_anything(pump):
+                    self._hud.loose_live()
+                elif self._taxi.refuel_from(pump):
+                    pass  # introduire les effets secondaires de remplissage de réservoir ici
 
-        if self._gate.is_closed() and self._taxi.crash_on_anything(self._gate):
-            self._hud.loose_live()
-
-        for pump in self._pumps:
-            if self._taxi.crash_on_anything(pump):
-                self._hud.loose_live()
-            elif self._taxi.refuel_from(pump):
-                pass  # introduire les effets secondaires de remplissage de réservoir ici
-
-        if self._hud.get_lives() == 0:
-            self.display_game_over_message()
+            if self._hud.get_lives() == 0:
+                self.display_game_over_message()
 
     def render(self, screen: pygame.Surface) -> None:
         """
@@ -215,7 +236,6 @@ class LevelScene(Scene):
           #                  Astronaut(self._pads[0], Pad.UP, 20.00)]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
-
 
     def astronaut_spawner(self, astronaut_to_spawn) -> Astronaut :
         return Astronaut(self._astronauts_pad_positions[astronaut_to_spawn][0],
@@ -356,4 +376,9 @@ class LevelScene(Scene):
                         pygame.quit()
                         sys.exit()
 
+    def respawn_taxi(self):
+        self._taxi_spawned_time = pygame.time.get_ticks()
+        self._taxi_spawning = True
+        pygame.mixer.music.load(FILES["spawn_jingle"])
+        pygame.mixer.music.play(loops=0)
 

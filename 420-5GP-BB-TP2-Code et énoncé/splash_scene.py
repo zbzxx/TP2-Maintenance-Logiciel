@@ -76,27 +76,49 @@ class SplashScene(Scene):
         # Surface sur laquelle afficher le texte
         text_surface = pygame.Surface((screen.get_width(), 50), pygame.SRCALPHA)
 
-        #Create text parts
+        # Crée les texte
         text1 = self._font.render("PRESS ", True, (255, 255, 255))
         text2 = self._font.render("SPACE", True, (255, 255, 0))
         text3 = self._font.render(" OR ", True, (255, 255, 255))
         text4 = self._font.render("RETURN", True, (255, 255, 0))
         text5 = self._font.render(" TO PLAY", True, (255, 255, 255))
 
+        text1_outline = self._font.render("PRESS ", True, (0, 0, 139))
+        text2_outline = self._font.render("SPACE", True, (0, 0, 139))
+        text3_outline = self._font.render(" OR ", True, (0, 0, 139))
+        text4_outline = self._font.render("RETURN", True, (0, 0, 139))
+        text5_outline = self._font.render(" TO PLAY", True, (0, 0, 139))
+
         # Position du texte
         text_y = 25
         x_offset = (screen.get_width() - (
             text1.get_width() + text2.get_width() + text3.get_width() + text4.get_width() + text5.get_width())) // 2
 
+        def draw_outline(init_x_offset, init_y_offset, text_outline):
+            outline_offset = 4
+            text_surface.blit(text_outline, (init_x_offset + outline_offset, init_y_offset))
+            text_surface.blit(text_outline, (init_x_offset - outline_offset, init_y_offset))
+            text_surface.blit(text_outline, (init_x_offset, init_y_offset + outline_offset))
+            text_surface.blit(text_outline, (init_x_offset, init_y_offset - outline_offset))
+            text_surface.blit(text_outline, (init_x_offset + outline_offset, init_y_offset + outline_offset))
+            text_surface.blit(text_outline, (init_x_offset - outline_offset, init_y_offset - outline_offset))
+            text_surface.blit(text_outline, (init_x_offset + outline_offset, init_y_offset + outline_offset))
+            text_surface.blit(text_outline, (init_x_offset - outline_offset, init_y_offset + outline_offset))
+
         # Ajoute le texte à la surface
+        draw_outline(x_offset, text_y, text1_outline)
         text_surface.blit(text1, (x_offset, text_y))
         x_offset += text1.get_width()
+        draw_outline(x_offset, text_y, text2_outline)
         text_surface.blit(text2, (x_offset, text_y))
         x_offset += text2.get_width()
+        draw_outline(x_offset, text_y, text3_outline)
         text_surface.blit(text3, (x_offset, text_y))
         x_offset += text3.get_width()
+        draw_outline(x_offset, text_y, text4_outline)
         text_surface.blit(text4, (x_offset, text_y))
         x_offset += text4.get_width()
+        draw_outline(x_offset, text_y, text5_outline)
         text_surface.blit(text5, (x_offset, text_y))
 
         # Applique l'opacité à la surface
