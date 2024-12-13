@@ -39,7 +39,7 @@ class Taxi(pygame.sprite.Sprite):
     _FLAG_GEAR_OUT = 1 << 4  # indique si le train d'atterrissage est sorti
     _FLAG_DESTROYED = 1 << 5  # indique si le taxi est détruit
 
-    _REACTOR_SOUND_VOLUME = 0.25
+    _REACTOR_SOUND_VOLUME =1
 
     _REAR_REACTOR_POWER = 0.001
     _BOTTOM_REACTOR_POWER = 0.0005

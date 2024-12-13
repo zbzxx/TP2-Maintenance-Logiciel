@@ -130,9 +130,11 @@ class LevelScene(Scene):
                         self._gate.open()
                     elif self._taxi.has_exited():
                         self._taxi.unboard_astronaut()
+                        self._taxi._reactor_sound.set_volume(0)
                         self._taxi = None
                         self._fade_out_start_time = pygame.time.get_ticks()
                         SceneManager().change_scene(f"level{self.level + 1}_load", LevelScene._FADE_OUT_DURATION)
+
                         return
             elif self._astronaut.has_reached_destination():
                 if self._nb_taxied_astronauts < len(self._astronauts_pad_positions) - 1:
@@ -264,6 +266,10 @@ class LevelScene(Scene):
 
         # Dessine la surface sur l'écran
         screen.blit(text_surface, (background_rect.left, background_rect.top))
+
+
+
+
 
     def _manage_text_opacity(self):
         """Gère l'apparition et disparition du texte"""
